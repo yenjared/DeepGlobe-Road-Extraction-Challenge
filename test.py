@@ -17,20 +17,21 @@ from networks.dinknet import LinkNet34, DinkNet34, DinkNet50, DinkNet101, DinkNe
 
 from sklearn.metrics import jaccard_score, precision_recall_fscore_support
 
-BATCHSIZE_PER_CARD = 4
+BATCHSIZE_PER_CARD = 8
 
 class TTAFrame():
     def __init__(self, net):
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        self.net = net()#.to(device)
+        self.net = net().to(device)
         self.net = torch.nn.DataParallel(self.net, device_ids=range(torch.cuda.device_count()))
         
     def test_one_img_from_path(self, path, evalmode = True):
         if evalmode:
             self.net.eval()
         #batchsize = torch.cuda.device_count() * BATCHSIZE_PER_CARD
-        #batchsize = BATCHSIZE_PER_CARD
-        batchsize = 4 if torch.cuda.is_available() else BATCHSIZE_PER_CARD * torch.cuda.device_count()
+        batchsize = BATCHSIZE_PER_CARD
+        #batchsize = BATCHSIZE_PER_CARD if torch.cuda.is_available() else BATCHSIZE_PER_CARD * torch.cuda.device_count()
+        
         if batchsize >= 8:
             return self.test_one_img_from_path_1(path)
         elif batchsize >= 4:
@@ -124,7 +125,7 @@ class TTAFrame():
     def test_one_img_from_path_1(self, path):
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         img = cv2.imread(path)#.transpose(2,0,1)[None]
-        
+
         img90 = np.array(np.rot90(img))
         img1 = np.concatenate([img[None],img90[None]])
         img2 = np.array(img1)[:,::-1]
@@ -172,14 +173,19 @@ for i,name in enumerate(lab):
 
     gt=list(filter(lambda x: x.endswith('.tiff') 
                          and x.find(name.rpartition('.')[0])!=-1,val))[0]
-    gt=cv2.imread(source+gt)
+    gt=cv2.imread(source+gt,0)
+    gt[gt>128] = 255
+    gt[gt<=128] = 0
 
-    print(source+name)
     mask = solver.test_one_img_from_path(source+name)
     mask[mask>4.0] = 255
     mask[mask<=4.0] = 0
-    mask = np.concatenate([mask[:,:,None],mask[:,:,None],mask[:,:,None]],axis=2)
     
+    print(type(gt))
+    print(gt.shape)
+    print(type(mask))
+    print(mask.shape)
+
     iou_curr=jaccard_score(gt,mask,average='micro')
     prf=precision_recall_fscore_support(gt,mask,average='micro')
 
@@ -188,14 +194,20 @@ for i,name in enumerate(lab):
     recall.append(prf[1])
     f1score.append(prf[2])
 
+    print(source+name)
+    mask = np.concatenate([mask[:,:,None],mask[:,:,None],mask[:,:,None]],axis=2)
+
     #print(source+name, '\n',iou_curr)
     #print(target+name.rsplit('.')+'mask.png')
     #target='/content/'
     #if isFirst
     #cv2.imwrite(target+name.rpartition('.')[0]+'_mask.png',mask.astype(np.uint8))
     break
+
 with open(target+'performance_log.txt','a') as f:
-  f.write("IoU:      "+str(np.mean(np.array(iou))))
-  f.write("Precision:"+str(np.mean(np.array(precision))))
-  f.write("Recall:   "+str(np.mean(np.array(recall))))
-  f.write("F1:       "+str(np.mean(np.array(f1score))))  
+  f.write("Baseline"+"\n")
+  f.write('IoU,P,R,F\n')
+  f.write('%s' % float('%.4g' % np.mean(np.array(iou)))+"," +
+          '%s' % float('%.4g' % np.mean(np.array(precision))) + "," +
+          '%s' % float('%.4g' % np.mean(np.array(recall)))+","+
+          '%s' % float('%.4g' % np.mean(np.array(f1score)))+"\n")  
