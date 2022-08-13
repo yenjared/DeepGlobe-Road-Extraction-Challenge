@@ -160,11 +160,11 @@ except:
 
 lab=list(filter(lambda x: x.endswith('tif'),val))
 iou=[]
-for i,name in enumerate(val):
+for i,name in enumerate(lab):
     if i%10 == 0:
         print(i/10, '    ','%.2f'%(time()-tic))
     gt=list(filter(lambda x: x.endswith('.tiff') 
-                      and x.find(name.rpartition('.')[0]),val))
+                         and x.find(name.rpartition('.')[0])!=-1,val))[0]
 
     gt=cv2.imread(source+gt)
     mask = solver.test_one_img_from_path(source+name)
@@ -174,7 +174,7 @@ for i,name in enumerate(val):
     mask = np.concatenate([mask[:,:,None],mask[:,:,None],mask[:,:,None]],axis=2)
     iou_curr=seg_iou(mask,gt)
     iou.append(iou_curr)
-    print(source+gt, '\n',iou_curr)
+    print(source+name, '\n',iou_curr)
     #print(target+name.rsplit('.')+'mask.png')
     #target='/content/'
     #if isFirst
