@@ -15,6 +15,8 @@ from networks.unet import Unet
 from networks.dunet import Dunet
 from networks.dinknet import LinkNet34, DinkNet34, DinkNet50, DinkNet101, DinkNet34_less_pool
 
+from metrics import seg_iou
+
 BATCHSIZE_PER_CARD = 4
 
 class TTAFrame():
@@ -150,17 +152,24 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 solver.load('weights/log01_dink34.th')
 tic = time()
 target = 'submits/log01_dink34/'
-os.mkdir(target)
-isFirst=True
+try:
+  os.mkdir(target)
+except:
+  pass
+#isFirst=True
+
+val=list(filter(lambda x: x.endswith('tif'),val))
 for i,name in enumerate(val):
     if i%10 == 0:
         print(i/10, '    ','%.2f'%(time()-tic))
-    mask = solver.test_one_img_from_path(source+name)
-    mask[mask>4.0] = 255
-    mask[mask<=4.0] = 0
-    mask = np.concatenate([mask[:,:,None],mask[:,:,None],mask[:,:,None]],axis=2)
+    #mask = solver.test_one_img_from_path(source+name)
+    print(source+name)
+    #mask[mask>4.0] = 255
+    #mask[mask<=4.0] = 0
+    #mask = np.concatenate([mask[:,:,None],mask[:,:,None],mask[:,:,None]],axis=2)
+    
     #print(target+name.rsplit('.')+'mask.png')
     #target='/content/'
     #if isFirst
-    cv2.imwrite(target+name.rpartition('.')[0]+'_mask.png',mask.astype(np.uint8))
+    #cv2.imwrite(target+name.rpartition('.')[0]+'_mask.png',mask.astype(np.uint8))
     #break

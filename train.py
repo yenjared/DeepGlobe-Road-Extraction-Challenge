@@ -18,9 +18,10 @@ from data import ImageFolder
 
 SHAPE = (1024,1024)
 ROOT = 'dataset/train/'
-imagelist = filter(lambda x: x.find('sat')!=-1, os.listdir(ROOT))
+imagelist = filter(lambda x: x[-3:].find('tif')!=-1, os.listdir(ROOT))
 trainlist = map(lambda x: x[:-8], imagelist)
-NAME = 'log01_dink34'
+NAME = 'phase01_dink34'
+#NAME = 'log01_dink34'
 BATCHSIZE_PER_CARD = 4
 
 solver = MyFrame(DinkNet34, dice_bce_loss, 2e-4)
@@ -36,7 +37,9 @@ data_loader = torch.utils.data.DataLoader(
 mylog = open('logs/'+NAME+'.log','w')
 tic = time()
 no_optim = 0
-total_epoch = 300
+total_epoch = 50
+#total_epoch = 300
+
 train_epoch_best_loss = 100.
 for epoch in range(1, total_epoch + 1):
     data_loader_iter = iter(data_loader)
@@ -50,10 +53,10 @@ for epoch in range(1, total_epoch + 1):
     print >> mylog, 'epoch:',epoch,'    time:',int(time()-tic)
     print >> mylog, 'train_loss:',train_epoch_loss
     print >> mylog, 'SHAPE:',SHAPE
-    print '********'
-    print 'epoch:',epoch,'    time:',int(time()-tic)
-    print 'train_loss:',train_epoch_loss
-    print 'SHAPE:',SHAPE
+    print('********')
+    print('epoch:',epoch,'    time:',int(time()-tic))
+    print('train_loss:',train_epoch_loss)
+    print('SHAPE:',SHAPE)
     
     if train_epoch_loss >= train_epoch_best_loss:
         no_optim += 1
@@ -63,7 +66,7 @@ for epoch in range(1, total_epoch + 1):
         solver.save('weights/'+NAME+'.th')
     if no_optim > 6:
         print >> mylog, 'early stop at %d epoch' % epoch
-        print 'early stop at %d epoch' % epoch
+        print('early stop at %d epoch' % epoch)
         break
     if no_optim > 3:
         if solver.old_lr < 5e-7:
@@ -73,5 +76,5 @@ for epoch in range(1, total_epoch + 1):
     mylog.flush()
     
 print >> mylog, 'Finish!'
-print 'Finish!'
+print('Finish!')
 mylog.close()
