@@ -181,10 +181,10 @@ for i,name in enumerate(lab):
     mask[mask>4.0] = 255
     mask[mask<=4.0] = 0
     
-    print(type(gt))
-    print(gt.shape)
-    print(type(mask))
-    print(mask.shape)
+    #print(type(gt))
+    #print(gt.shape)
+    #print(type(mask))
+    #print(mask.shape)
 
     iou_curr=jaccard_score(gt,mask,average='micro')
     prf=precision_recall_fscore_support(gt,mask,average='micro')
@@ -202,7 +202,6 @@ for i,name in enumerate(lab):
     #target='/content/'
     #if isFirst
     #cv2.imwrite(target+name.rpartition('.')[0]+'_mask.png',mask.astype(np.uint8))
-    break
 
 with open(target+'performance_log.txt','a') as f:
   f.write("Baseline"+"\n")
