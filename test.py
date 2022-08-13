@@ -160,7 +160,7 @@ for i,name in enumerate(val):
     mask[mask<=4.0] = 0
     mask = np.concatenate([mask[:,:,None],mask[:,:,None],mask[:,:,None]],axis=2)
     #print(target+name.rsplit('.')+'mask.png')
-    target='/content/'
+    #target='/content/'
     #if isFirst
     cv2.imwrite(target+name.rpartition('.')[0]+'_mask.png',mask.astype(np.uint8))
     #break
