@@ -27,7 +27,8 @@ class TTAFrame():
         if evalmode:
             self.net.eval()
         #batchsize = torch.cuda.device_count() * BATCHSIZE_PER_CARD
-        batchsize = BATCHSIZE_PER_CARD
+        #batchsize = BATCHSIZE_PER_CARD
+        batchsize = BATCHSIZE_PER_CARD if torch.cuda.is_available() else BATCHSIZE_PER_CARD * torch.cuda.device_count()
         if batchsize >= 8:
             return self.test_one_img_from_path_1(path)
         elif batchsize >= 4:
