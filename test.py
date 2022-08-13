@@ -15,14 +15,14 @@ from networks.unet import Unet
 from networks.dunet import Dunet
 from networks.dinknet import LinkNet34, DinkNet34, DinkNet50, DinkNet101, DinkNet34_less_pool
 
-from metrics import seg_iou
+from sklearn.metrics import jaccard_score, precision_recall_fscore_support
 
-BATCHSIZE_PER_CARD = 8
+BATCHSIZE_PER_CARD = 4
 
 class TTAFrame():
     def __init__(self, net):
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        self.net = net().to(device)
+        self.net = net()#.to(device)
         self.net = torch.nn.DataParallel(self.net, device_ids=range(torch.cuda.device_count()))
         
     def test_one_img_from_path(self, path, evalmode = True):
@@ -30,7 +30,7 @@ class TTAFrame():
             self.net.eval()
         #batchsize = torch.cuda.device_count() * BATCHSIZE_PER_CARD
         #batchsize = BATCHSIZE_PER_CARD
-        batchsize = BATCHSIZE_PER_CARD if torch.cuda.is_available() else BATCHSIZE_PER_CARD * torch.cuda.device_count()
+        batchsize = 4 if torch.cuda.is_available() else BATCHSIZE_PER_CARD * torch.cuda.device_count()
         if batchsize >= 8:
             return self.test_one_img_from_path_1(path)
         elif batchsize >= 4:
@@ -98,6 +98,7 @@ class TTAFrame():
     
     def test_one_img_from_path_2(self, path):
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
         img = cv2.imread(path)#.transpose(2,0,1)[None]
         img90 = np.array(np.rot90(img))
         img1 = np.concatenate([img[None],img90[None]])
@@ -152,32 +153,49 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 solver.load('weights/log01_dink34.th')
 tic = time()
 target = 'submits/log01_dink34/'
+
 try:
   os.mkdir(target)
 except:
   pass
-#isFirst=True
 
 lab=list(filter(lambda x: x.endswith('tif'),val))
+
 iou=[]
+precision=[]
+recall=[]
+f1score=[]
+
 for i,name in enumerate(lab):
     if i%10 == 0:
         print(i/10, '    ','%.2f'%(time()-tic))
+
     gt=list(filter(lambda x: x.endswith('.tiff') 
                          and x.find(name.rpartition('.')[0])!=-1,val))[0]
-
     gt=cv2.imread(source+gt)
+
+    print(source+name)
     mask = solver.test_one_img_from_path(source+name)
-    #print(source+name)
     mask[mask>4.0] = 255
     mask[mask<=4.0] = 0
     mask = np.concatenate([mask[:,:,None],mask[:,:,None],mask[:,:,None]],axis=2)
-    iou_curr=seg_iou(mask,gt)
+    
+    iou_curr=jaccard_score(gt,mask,average='micro')
+    prf=precision_recall_fscore_support(gt,mask,average='micro')
+
     iou.append(iou_curr)
-    print(source+name, '\n',iou_curr)
+    precision.append(prf[0])
+    recall.append(prf[1])
+    f1score.append(prf[2])
+
+    #print(source+name, '\n',iou_curr)
     #print(target+name.rsplit('.')+'mask.png')
     #target='/content/'
     #if isFirst
     #cv2.imwrite(target+name.rpartition('.')[0]+'_mask.png',mask.astype(np.uint8))
-    #break
-print("mIoU:",np.mean(np.array(iou)))
+    break
+with open(target+'performance_log.txt','a') as f:
+  f.write("IoU:      "+str(np.mean(np.array(iou))))
+  f.write("Precision:"+str(np.mean(np.array(precision))))
+  f.write("Recall:   "+str(np.mean(np.array(recall))))
+  f.write("F1:       "+str(np.mean(np.array(f1score))))  
