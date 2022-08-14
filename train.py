@@ -25,7 +25,7 @@ ROOT = 'dataset/train/'
 imagelist = filter(lambda x: x[-3:].find('tif')!=-1, os.listdir(ROOT)) # training image list
 trainlist = list(map(lambda x: x.rpartition('.')[0], imagelist)) # label prefix list
 print(len(trainlist))
-NAME = 'phase01_dink34'
+NAME = 'test01_dink34'
 #NAME = 'log01_dink34'
 BATCHSIZE_PER_CARD = 4
 
@@ -46,7 +46,7 @@ data_loader = torch.utils.data.DataLoader( # combines dataset and sampler
 file=mylog = open('logs/'+NAME+'.log','w')
 tic = time()
 no_optim = 0
-total_epoch = 300
+total_epoch = 10
 #total_epoch = 300
 
 train_epoch_best_loss = 100.

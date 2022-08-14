@@ -16,7 +16,7 @@ class MyFrame():
           # Replace last fully connected convolution layer
         self.net.finalconv3 = nn.Conv2d(32, 1, 3, padding=1)
         #"""
-
+        
         self.net = torch.nn.DataParallel(self.net, device_ids=range(torch.cuda.device_count()))
         self.optimizer = torch.optim.Adam(params=self.net.parameters(), lr=lr)
         #self.optimizer = torch.optim.RMSprop(params=self.net.parameters(), lr=lr)

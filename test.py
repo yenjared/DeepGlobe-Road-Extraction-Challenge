@@ -16,6 +16,7 @@ from networks.dunet import Dunet
 from networks.dinknet import LinkNet34, DinkNet34, DinkNet50, DinkNet101, DinkNet34_less_pool
 
 from sklearn.metrics import jaccard_score, precision_recall_fscore_support
+from torchsummary import summary
 
 BATCHSIZE_PER_CARD = 8
 
@@ -23,8 +24,9 @@ class TTAFrame():
     def __init__(self, net):
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.net = net().to(device)
+        summary(self.net,(3,1024,1024))
         self.net = torch.nn.DataParallel(self.net, device_ids=range(torch.cuda.device_count()))
-        
+        #print(net)
     def test_one_img_from_path(self, path, evalmode = True):
         if evalmode:
             self.net.eval()
@@ -41,6 +43,7 @@ class TTAFrame():
 
     def test_one_img_from_path_8(self, path):
         img = cv2.imread(path)#.transpose(2,0,1)[None]
+        print(img.shape)
         img90 = np.array(np.rot90(img))
         img1 = np.concatenate([img[None],img90[None]])
         img2 = np.array(img1)[:,::-1]
@@ -69,6 +72,7 @@ class TTAFrame():
 
     def test_one_img_from_path_4(self, path):
         img = cv2.imread(path)#.transpose(2,0,1)[None]
+        print(img.shape)
         img90 = np.array(np.rot90(img))
         img1 = np.concatenate([img[None],img90[None]])
         img2 = np.array(img1)[:,::-1]
@@ -97,6 +101,7 @@ class TTAFrame():
     
     def test_one_img_from_path_2(self, path):
         img = cv2.imread(path)#.transpose(2,0,1)[None]
+        print(img.shape)
         img90 = np.array(np.rot90(img))
         img1 = np.concatenate([img[None],img90[None]])
         img2 = np.array(img1)[:,::-1]
@@ -120,7 +125,7 @@ class TTAFrame():
     
     def test_one_img_from_path_1(self, path):
         img = cv2.imread(path)#.transpose(2,0,1)[None]
-        
+        print(img.shape)
         img90 = np.array(np.rot90(img))
         img1 = np.concatenate([img[None],img90[None]])
         img2 = np.array(img1)[:,::-1]
@@ -145,7 +150,7 @@ source = 'dataset/test/'
 val = os.listdir(source)
 solver = TTAFrame(DinkNet34)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-NAME='log01_dink34'
+NAME='test01_dink34'
 solver.load('weights/'+NAME+'.th')
 tic = time()
 target = 'submits/log01_dink34/'
@@ -179,12 +184,12 @@ for i,name in enumerate(lab):
     mask.dtype=np.uint8
     #mask=mask>128
     #print()
-    print(type(gt))
-    print(gt.dtype)
+    #print(type(gt))
+    #print(gt.dtype)
     print(gt.shape)
 
-    print(type(mask))
-    print(mask.dtype)
+    #print(type(mask))
+    #print(mask.dtype)
     print(mask.shape)
 
     iou_curr=jaccard_score(gt,mask,average='micro')

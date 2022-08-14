@@ -165,6 +165,7 @@ class DinkNet34(nn.Module):
         self.finalconv2 = nn.Conv2d(32, 32, 3, padding=1)
         self.finalrelu2 = nonlinearity
         self.finalconv3 = nn.Conv2d(32, num_classes, 3, padding=1)
+        print("number of classes:",num_classes)
 
     def forward(self, x):
         # Encoder
