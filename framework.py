@@ -8,6 +8,15 @@ import numpy as np
 class MyFrame():
     def __init__(self, net, loss, lr=2e-4, evalmode = False):
         self.net = net().cuda() # aka nn.Module Dinknet34 in dinknet.py
+
+        #""" Pretraining code block
+        self.net.load_state_dict(torch.load('weights/log01_dink34.th'))
+        for param in self.net.parameters():
+            param.requires_grad = False
+        # Replace last fully connected convolution layer
+        self.net.finalconv3 = nn.Conv2d(32, 1, 3, padding=1)
+        #"""
+
         self.net = torch.nn.DataParallel(self.net, device_ids=range(torch.cuda.device_count()))
         self.optimizer = torch.optim.Adam(params=self.net.parameters(), lr=lr)
         #self.optimizer = torch.optim.RMSprop(params=self.net.parameters(), lr=lr)

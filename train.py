@@ -29,7 +29,7 @@ NAME = 'phase01_dink34'
 BATCHSIZE_PER_CARD = 4
 
 # MyFrame from framework.py
-# uses D-LinkNet34, binary cross entropy loss function and 2e-4 learning rate
+# uses D-LinkNet34, dice binary cross entropy loss function and 2e-4 learning rate
 solver = MyFrame(DinkNet34, dice_bce_loss, 2e-4) # TUNE LEARNING RATE
 batchsize = torch.cuda.device_count() * BATCHSIZE_PER_CARD
 
@@ -45,12 +45,12 @@ data_loader = torch.utils.data.DataLoader( # combines dataset and sampler
 mylog = open('logs/'+NAME+'.log','w')
 tic = time()
 no_optim = 0
-total_epoch = 50
+total_epoch = 15
 #total_epoch = 300
 
 train_epoch_best_loss = 100.
 for epoch in range(1, total_epoch + 1):
-    
+
     # iter returns a shuffled dataset for every epoch
     data_loader_iter = iter(data_loader)
 
