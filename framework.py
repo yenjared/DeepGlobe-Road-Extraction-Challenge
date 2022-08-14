@@ -72,7 +72,8 @@ class MyFrame():
         loss = self.loss(self.mask, pred)
         loss.backward()
         self.optimizer.step()
-        return loss.data[0]
+        return loss.data.item()
+        #return loss.data[0]
 
     def save(self, path):
         torch.save(self.net.state_dict(), path)
@@ -86,6 +87,6 @@ class MyFrame():
         for param_group in self.optimizer.param_groups:
             param_group['lr'] = new_lr
 
-        print >> mylog, 'update learning rate: %f -> %f' % (self.old_lr, new_lr)
         print('update learning rate: %f -> %f' % (self.old_lr, new_lr))
+        print('update learning rate: %f -> %f' % (self.old_lr, new_lr),mylog)
         self.old_lr = new_lr
