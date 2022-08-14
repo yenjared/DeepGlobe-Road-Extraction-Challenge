@@ -150,8 +150,8 @@ source = 'dataset/test/'
 val = os.listdir(source)
 solver = TTAFrame(DinkNet34)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-       
-solver.load('weights/log01_dink34.th')
+NAME='log01_dink34'
+solver.load('weights/'+NAME+'.th')
 tic = time()
 target = 'submits/log01_dink34/'
 
@@ -176,15 +176,21 @@ for i,name in enumerate(lab):
     gt=cv2.imread(source+gt,0)
     gt[gt>128] = 255
     gt[gt<=128] = 0
+    #gt=gt>128
 
     mask = solver.test_one_img_from_path(source+name)
     mask[mask>4.0] = 255
     mask[mask<=4.0] = 0
-    
-    #print(type(gt))
-    #print(gt.shape)
-    #print(type(mask))
-    #print(mask.shape)
+    mask.dtype=np.uint8
+    #mask=mask>128
+    #print()
+    print(type(gt))
+    print(gt.dtype)
+    print(gt.shape)
+
+    print(type(mask))
+    print(mask.dtype)
+    print(mask.shape)
 
     iou_curr=jaccard_score(gt,mask,average='micro')
     prf=precision_recall_fscore_support(gt,mask,average='micro')
@@ -204,7 +210,7 @@ for i,name in enumerate(lab):
     #cv2.imwrite(target+name.rpartition('.')[0]+'_mask.png',mask.astype(np.uint8))
 
 with open(target+'performance_log.txt','a') as f:
-  f.write("Baseline"+"\n")
+  f.write(NAME+"\n")
   f.write('IoU,P,R,F\n')
   f.write('%s' % float('%.4g' % np.mean(np.array(iou)))+"," +
           '%s' % float('%.4g' % np.mean(np.array(precision))) + "," +

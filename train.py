@@ -25,13 +25,13 @@ ROOT = 'dataset/train/'
 imagelist = filter(lambda x: x[-3:].find('tif')!=-1, os.listdir(ROOT)) # training image list
 trainlist = list(map(lambda x: x.rpartition('.')[0], imagelist)) # label prefix list
 print(len(trainlist))
-NAME = 'phase03_dink34'
+NAME = 'phase01_dink34'
 #NAME = 'log01_dink34'
 BATCHSIZE_PER_CARD = 4
 
 # MyFrame from framework.py
 # uses D-LinkNet34, dice binary cross entropy loss function and 2e-4 learning rate
-solver = MyFrame(DinkNet34, dice_bce_loss, 3e-4) # TUNE LEARNING RATE
+solver = MyFrame(DinkNet34, dice_bce_loss, 2.2e-5) # TUNE LEARNING RATE
 batchsize = torch.cuda.device_count() * BATCHSIZE_PER_CARD
 
 # torch.utils.data.Dataset abstract class instance, returns image and label, in data.py
@@ -46,7 +46,7 @@ data_loader = torch.utils.data.DataLoader( # combines dataset and sampler
 file=mylog = open('logs/'+NAME+'.log','w')
 tic = time()
 no_optim = 0
-total_epoch = 15
+total_epoch = 300
 #total_epoch = 300
 
 train_epoch_best_loss = 100.
@@ -84,7 +84,7 @@ for epoch in range(1, total_epoch + 1):
         if solver.old_lr < 5e-7:
             break
         solver.load('weights/'+NAME+'.th')
-        solver.update_lr(5.0, factor = True, file=mylog)
+        solver.update_lr(5.0,mylog,factor = True)
     file=mylog.flush()
 
 print('Finish!',file=mylog)
