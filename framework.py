@@ -10,10 +10,10 @@ class MyFrame():
         self.net = net().cuda() # aka nn.Module Dinknet34 in dinknet.py
 
         #""" Pretraining code block
-        self.net.load_state_dict(torch.load('weights/log01_dink34.th'))
+        self.net.load_state_dict(torch.load('weights/log01_dink34.th'),strict=False)
         for param in self.net.parameters():
             param.requires_grad = False
-        # Replace last fully connected convolution layer
+          # Replace last fully connected convolution layer
         self.net.finalconv3 = nn.Conv2d(32, 1, 3, padding=1)
         #"""
 
@@ -87,5 +87,5 @@ class MyFrame():
             param_group['lr'] = new_lr
 
         print >> mylog, 'update learning rate: %f -> %f' % (self.old_lr, new_lr)
-        print 'update learning rate: %f -> %f' % (self.old_lr, new_lr)
+        print('update learning rate: %f -> %f' % (self.old_lr, new_lr))
         self.old_lr = new_lr

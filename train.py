@@ -23,7 +23,8 @@ TODO: Tune learning rate, line 32ish
 SHAPE = (1024,1024)
 ROOT = 'dataset/train/'
 imagelist = filter(lambda x: x[-3:].find('tif')!=-1, os.listdir(ROOT)) # training image list
-trainlist = map(lambda x: x.rpartition('.')[0], imagelist) # label prefix list
+trainlist = list(map(lambda x: x.rpartition('.')[0], imagelist)) # label prefix list
+print(len(trainlist))
 NAME = 'phase01_dink34'
 #NAME = 'log01_dink34'
 BATCHSIZE_PER_CARD = 4
