@@ -150,7 +150,7 @@ source = 'dataset/test/'
 val = os.listdir(source)
 solver = TTAFrame(DinkNet34)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-NAME='test01_dink34'
+NAME='log01_dink34'
 solver.load('weights/'+NAME+'.th')
 tic = time()
 target = 'submits/log01_dink34/'
@@ -201,7 +201,7 @@ for i,name in enumerate(lab):
     f1score.append(prf[2])
 
     print(source+name)
-    mask = np.concatenate([mask[:,:,None],mask[:,:,None],mask[:,:,None]],axis=2)
+    #mask = np.concatenate([mask[:,:,None],mask[:,:,None],mask[:,:,None]],axis=2)
     break
     #print(source+name, '\n',iou_curr)
     #print(target+name.rsplit('.')+'mask.png')
