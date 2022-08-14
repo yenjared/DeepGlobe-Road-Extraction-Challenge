@@ -18,13 +18,13 @@ from networks.dinknet import LinkNet34, DinkNet34, DinkNet50, DinkNet101, DinkNe
 from sklearn.metrics import jaccard_score, precision_recall_fscore_support
 from torchsummary import summary
 
-BATCHSIZE_PER_CARD = 8
+BATCHSIZE_PER_CARD = 4
 
 class TTAFrame():
     def __init__(self, net):
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.net = net().to(device)
-        summary(self.net,(3,1024,1024))
+        #summary(self.net,(3,1024,1024))
         self.net = torch.nn.DataParallel(self.net, device_ids=range(torch.cuda.device_count()))
         #print(net)
     def test_one_img_from_path(self, path, evalmode = True):
@@ -41,9 +41,9 @@ class TTAFrame():
         elif batchsize >= 2:
             return self.test_one_img_from_path_4(path)
 
+
     def test_one_img_from_path_8(self, path):
         img = cv2.imread(path)#.transpose(2,0,1)[None]
-        print(img.shape)
         img90 = np.array(np.rot90(img))
         img1 = np.concatenate([img[None],img90[None]])
         img2 = np.array(img1)[:,::-1]
@@ -72,7 +72,6 @@ class TTAFrame():
 
     def test_one_img_from_path_4(self, path):
         img = cv2.imread(path)#.transpose(2,0,1)[None]
-        print(img.shape)
         img90 = np.array(np.rot90(img))
         img1 = np.concatenate([img[None],img90[None]])
         img2 = np.array(img1)[:,::-1]
@@ -101,7 +100,6 @@ class TTAFrame():
     
     def test_one_img_from_path_2(self, path):
         img = cv2.imread(path)#.transpose(2,0,1)[None]
-        print(img.shape)
         img90 = np.array(np.rot90(img))
         img1 = np.concatenate([img[None],img90[None]])
         img2 = np.array(img1)[:,::-1]
@@ -116,16 +114,21 @@ class TTAFrame():
         
         maska = self.net.forward(img5).squeeze().cpu().data.numpy()#.squeeze(1)
         maskb = self.net.forward(img6).squeeze().cpu().data.numpy()
-        
+        print("mask a",maska.shape)
+        print("mask b",maskb.shape)
+
         mask1 = maska + maskb[:,:,::-1]
+        print("mask 1",mask1.shape)
         mask2 = mask1[:2] + mask1[2:,::-1]
+        print("mask 2",mask2.shape)
         mask3 = mask2[0] + np.rot90(mask2[1])[::-1,::-1]
+        print("mask 3",mask3.shape)
         
         return mask3
     
     def test_one_img_from_path_1(self, path):
         img = cv2.imread(path)#.transpose(2,0,1)[None]
-        print(img.shape)
+        
         img90 = np.array(np.rot90(img))
         img1 = np.concatenate([img[None],img90[None]])
         img2 = np.array(img1)[:,::-1]
@@ -141,6 +144,7 @@ class TTAFrame():
         mask3 = mask2[0] + np.rot90(mask2[1])[::-1,::-1]
         
         return mask3
+
 
     def load(self, path):
         self.net.load_state_dict(torch.load(path,map_location=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")))
@@ -179,18 +183,19 @@ for i,name in enumerate(lab):
     #gt=gt>128
 
     mask = solver.test_one_img_from_path(source+name)
+    print('1',mask.shape)
     mask[mask>4.0] = 255
     mask[mask<=4.0] = 0
-    mask.dtype=np.uint8
+    #mask.dtype=np.uint8
     #mask=mask>128
     #print()
     #print(type(gt))
     #print(gt.dtype)
-    print(gt.shape)
+    print('gt',gt.shape)
 
     #print(type(mask))
     #print(mask.dtype)
-    print(mask.shape)
+    print('mask',mask.shape)
 
     iou_curr=jaccard_score(gt,mask,average='micro')
     prf=precision_recall_fscore_support(gt,mask,average='micro')
