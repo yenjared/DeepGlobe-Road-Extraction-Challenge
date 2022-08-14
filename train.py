@@ -16,22 +16,30 @@ from framework import MyFrame
 from loss import dice_bce_loss
 from data import ImageFolder
 
+"""
+TODO: Tune learning rate, line 32ish
+"""
+
 SHAPE = (1024,1024)
 ROOT = 'dataset/train/'
-imagelist = filter(lambda x: x[-3:].find('tif')!=-1, os.listdir(ROOT))
-trainlist = map(lambda x: x[:-8], imagelist)
+imagelist = filter(lambda x: x[-3:].find('tif')!=-1, os.listdir(ROOT)) # training image list
+trainlist = map(lambda x: x.rpartition('.')[0], imagelist) # label prefix list
 NAME = 'phase01_dink34'
 #NAME = 'log01_dink34'
 BATCHSIZE_PER_CARD = 4
 
-solver = MyFrame(DinkNet34, dice_bce_loss, 2e-4)
+# MyFrame from framework.py
+# uses D-LinkNet34, binary cross entropy loss function and 2e-4 learning rate
+solver = MyFrame(DinkNet34, dice_bce_loss, 2e-4) # TUNE LEARNING RATE
 batchsize = torch.cuda.device_count() * BATCHSIZE_PER_CARD
 
+# torch.utils.data.Dataset abstract class instance, returns image and label
 dataset = ImageFolder(trainlist, ROOT)
-data_loader = torch.utils.data.DataLoader(
+
+data_loader = torch.utils.data.DataLoader( # combines dataset and sampler
     dataset,
     batch_size=batchsize,
-    shuffle=True,
+    shuffle=True, # shuffles data every epoch
     num_workers=4)
 
 mylog = open('logs/'+NAME+'.log','w')
@@ -42,7 +50,10 @@ total_epoch = 50
 
 train_epoch_best_loss = 100.
 for epoch in range(1, total_epoch + 1):
+    
+    # iter returns a shuffled dataset for every epoch
     data_loader_iter = iter(data_loader)
+
     train_epoch_loss = 0
     for img, mask in data_loader_iter:
         solver.set_input(img, mask)
@@ -57,7 +68,7 @@ for epoch in range(1, total_epoch + 1):
     print('epoch:',epoch,'    time:',int(time()-tic))
     print('train_loss:',train_epoch_loss)
     print('SHAPE:',SHAPE)
-    
+
     if train_epoch_loss >= train_epoch_best_loss:
         no_optim += 1
     else:
@@ -74,7 +85,7 @@ for epoch in range(1, total_epoch + 1):
         solver.load('weights/'+NAME+'.th')
         solver.update_lr(5.0, factor = True, mylog = mylog)
     mylog.flush()
-    
+
 print >> mylog, 'Finish!'
 print('Finish!')
 mylog.close()
