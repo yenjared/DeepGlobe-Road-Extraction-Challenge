@@ -33,7 +33,7 @@ BATCHSIZE_PER_CARD = 4
 solver = MyFrame(DinkNet34, dice_bce_loss, 2e-4) # TUNE LEARNING RATE
 batchsize = torch.cuda.device_count() * BATCHSIZE_PER_CARD
 
-# torch.utils.data.Dataset abstract class instance, returns image and label
+# torch.utils.data.Dataset abstract class instance, returns image and label, in data.py
 dataset = ImageFolder(trainlist, ROOT)
 
 data_loader = torch.utils.data.DataLoader( # combines dataset and sampler
