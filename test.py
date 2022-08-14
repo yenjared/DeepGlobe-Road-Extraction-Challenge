@@ -40,7 +40,6 @@ class TTAFrame():
             return self.test_one_img_from_path_4(path)
 
     def test_one_img_from_path_8(self, path):
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         img = cv2.imread(path)#.transpose(2,0,1)[None]
         img90 = np.array(np.rot90(img))
         img1 = np.concatenate([img[None],img90[None]])
@@ -53,10 +52,10 @@ class TTAFrame():
         img3 = img3.transpose(0,3,1,2)
         img4 = img4.transpose(0,3,1,2)
         
-        img1 = V(torch.Tensor(np.array(img1, np.float32)/255.0 * 3.2 -1.6).to(device))
-        img2 = V(torch.Tensor(np.array(img2, np.float32)/255.0 * 3.2 -1.6).to(device))
-        img3 = V(torch.Tensor(np.array(img3, np.float32)/255.0 * 3.2 -1.6).to(device))
-        img4 = V(torch.Tensor(np.array(img4, np.float32)/255.0 * 3.2 -1.6).to(device))
+        img1 = V(torch.Tensor(np.array(img1, np.float32)/255.0 * 3.2 -1.6).cuda())
+        img2 = V(torch.Tensor(np.array(img2, np.float32)/255.0 * 3.2 -1.6).cuda())
+        img3 = V(torch.Tensor(np.array(img3, np.float32)/255.0 * 3.2 -1.6).cuda())
+        img4 = V(torch.Tensor(np.array(img4, np.float32)/255.0 * 3.2 -1.6).cuda())
         
         maska = self.net.forward(img1).squeeze().cpu().data.numpy()
         maskb = self.net.forward(img2).squeeze().cpu().data.numpy()
@@ -69,7 +68,6 @@ class TTAFrame():
         return mask2
 
     def test_one_img_from_path_4(self, path):
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         img = cv2.imread(path)#.transpose(2,0,1)[None]
         img90 = np.array(np.rot90(img))
         img1 = np.concatenate([img[None],img90[None]])
@@ -82,10 +80,10 @@ class TTAFrame():
         img3 = img3.transpose(0,3,1,2)
         img4 = img4.transpose(0,3,1,2)
         
-        img1 = V(torch.Tensor(np.array(img1, np.float32)/255.0 * 3.2 -1.6).to(device))
-        img2 = V(torch.Tensor(np.array(img2, np.float32)/255.0 * 3.2 -1.6).to(device))
-        img3 = V(torch.Tensor(np.array(img3, np.float32)/255.0 * 3.2 -1.6).to(device))
-        img4 = V(torch.Tensor(np.array(img4, np.float32)/255.0 * 3.2 -1.6).to(device))
+        img1 = V(torch.Tensor(np.array(img1, np.float32)/255.0 * 3.2 -1.6).cuda())
+        img2 = V(torch.Tensor(np.array(img2, np.float32)/255.0 * 3.2 -1.6).cuda())
+        img3 = V(torch.Tensor(np.array(img3, np.float32)/255.0 * 3.2 -1.6).cuda())
+        img4 = V(torch.Tensor(np.array(img4, np.float32)/255.0 * 3.2 -1.6).cuda())
         
         maska = self.net.forward(img1).squeeze().cpu().data.numpy()
         maskb = self.net.forward(img2).squeeze().cpu().data.numpy()
@@ -98,8 +96,6 @@ class TTAFrame():
         return mask2
     
     def test_one_img_from_path_2(self, path):
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
         img = cv2.imread(path)#.transpose(2,0,1)[None]
         img90 = np.array(np.rot90(img))
         img1 = np.concatenate([img[None],img90[None]])
@@ -108,10 +104,10 @@ class TTAFrame():
         img4 = np.array(img3)[:,:,::-1]
         img5 = img3.transpose(0,3,1,2)
         img5 = np.array(img5, np.float32)/255.0 * 3.2 -1.6
-        img5 = V(torch.Tensor(img5).to(device))
+        img5 = V(torch.Tensor(img5).cuda())
         img6 = img4.transpose(0,3,1,2)
         img6 = np.array(img6, np.float32)/255.0 * 3.2 -1.6
-        img6 = V(torch.Tensor(img6).to(device))
+        img6 = V(torch.Tensor(img6).cuda())
         
         maska = self.net.forward(img5).squeeze().cpu().data.numpy()#.squeeze(1)
         maskb = self.net.forward(img6).squeeze().cpu().data.numpy()
@@ -123,9 +119,8 @@ class TTAFrame():
         return mask3
     
     def test_one_img_from_path_1(self, path):
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         img = cv2.imread(path)#.transpose(2,0,1)[None]
-
+        
         img90 = np.array(np.rot90(img))
         img1 = np.concatenate([img[None],img90[None]])
         img2 = np.array(img1)[:,::-1]
@@ -133,7 +128,7 @@ class TTAFrame():
         img4 = np.array(img3)[:,:,::-1]
         img5 = np.concatenate([img3,img4]).transpose(0,3,1,2)
         img5 = np.array(img5, np.float32)/255.0 * 3.2 -1.6
-        img5 = V(torch.Tensor(img5).to(device))
+        img5 = V(torch.Tensor(img5).cuda())
         
         mask = self.net.forward(img5).squeeze().cpu().data.numpy()#.squeeze(1)
         mask1 = mask[:4] + mask[4:,:,::-1]
@@ -202,7 +197,7 @@ for i,name in enumerate(lab):
 
     print(source+name)
     mask = np.concatenate([mask[:,:,None],mask[:,:,None],mask[:,:,None]],axis=2)
-
+    break
     #print(source+name, '\n',iou_curr)
     #print(target+name.rsplit('.')+'mask.png')
     #target='/content/'

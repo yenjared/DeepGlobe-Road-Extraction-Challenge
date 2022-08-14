@@ -14,3 +14,15 @@ IoU,P,R,F
 phase01_dink34
 IoU,P,R,F
 0.0,0.0,0.0,0.0
+log01_dink34
+IoU,P,R,F
+0.6056,0.7243,0.8001,0.7313
+log01_dink34
+IoU,P,R,F
+0.6056,0.7243,0.8001,0.7313
+phase01_dink34
+IoU,P,R,F
+0.0,0.0,0.0,0.0
+phase01_dink34
+IoU,P,R,F
+0.0,0.0,0.0,0.0
