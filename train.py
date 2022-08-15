@@ -26,7 +26,7 @@ imagelist = filter(lambda x: x[-3:].find('tif')!=-1, os.listdir(ROOT)) # trainin
 trainlist = list(map(lambda x: x.rpartition('.')[0], imagelist)) # label prefix list
 print(len(trainlist))
 #NAME = 'test03_dink34'
-NAME = 'final03_dink34'
+NAME = 'transfer01_dink34'
 #NAME = 'log01_dink34'
 BATCHSIZE_PER_CARD = 4
 

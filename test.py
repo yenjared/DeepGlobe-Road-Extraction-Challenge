@@ -156,7 +156,8 @@ def run():
     val = os.listdir(source)
     solver = TTAFrame(DinkNet34)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    NAME='final03_dink34'
+    NAME='transfer01_dink34'
+    print('weights/'+NAME+'.th')
     solver.load('weights/'+NAME+'.th')
     tic = time()
     target = 'submits/log01_dink34/'
@@ -175,7 +176,7 @@ def run():
 
     for i,name in enumerate(lab):
         if i%10 == 0:
-            print(i/10, '    ','%.2f'%(time()-tic))
+            print(i/10, ' fuckyou   ','%.2f'%(time()-tic))
 
         gt=list(filter(lambda x: x.endswith('.tiff') 
                             and x.find(name.rpartition('.')[0])!=-1,val))[0]
@@ -185,9 +186,10 @@ def run():
         #gt=gt>128
 
         mask = solver.test_one_img_from_path(source+name)
-        plt.hist(mask)
+        #plt.hist(mask)
         print('what')
-        break
+        #return mask
+        #break
         print('min, mean, max',
         np.min(mask),
         np.mean(mask),
@@ -197,11 +199,11 @@ def run():
         #plt
         #print('1',mask.shape)
 
-        mask[mask>1.6] = 255
-        mask[mask<=1.6] = 0
+        #mask[mask>1.6] = 255
+        #mask[mask<=1.6] = 0
 
-        #mask[mask>4.0] = 255
-        #mask[mask<=4.0] = 0
+        mask[mask>4.0] = 255
+        mask[mask<=4.0] = 0
 
         #mask.dtype=np.uint8
         #mask=mask>128
@@ -245,3 +247,5 @@ def run():
               '%s' % float('%.4g' % np.mean(np.array(precision))) + "," +
               '%s' % float('%.4g' % np.mean(np.array(recall)))+","+
               '%s' % float('%.4g' % np.mean(np.array(f1score)))+"\n")  
+print('fuck')
+run()
