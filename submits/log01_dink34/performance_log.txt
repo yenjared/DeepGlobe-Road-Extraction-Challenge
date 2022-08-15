@@ -128,3 +128,6 @@ nan,nan,nan,nan
 transfer01_dink34
 IoU,P,R,F
 0.6926,0.9019,0.7259,0.7847
+transfer01_dink34
+IoU,P,R,F
+0.6926,0.9019,0.7259,0.7847
