@@ -190,9 +190,9 @@ class DinkNet34(nn.Module):
         out = self.finalrelu1(out)
         out = self.finalconv2(out)
         out = self.finalrelu2(out)
-        print("pre-fc3:",out.shape)
+        #print("pre-fc3:",out.shape)
         out = self.finalconv3(out)
-        print("post-fc3:",out.shape)
+        #print("post-fc3:",out.shape)
 
         return F.sigmoid(out)
 

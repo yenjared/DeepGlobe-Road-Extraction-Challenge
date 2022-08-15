@@ -25,7 +25,7 @@ ROOT = 'dataset/train/'
 imagelist = filter(lambda x: x[-3:].find('tif')!=-1, os.listdir(ROOT)) # training image list
 trainlist = list(map(lambda x: x.rpartition('.')[0], imagelist)) # label prefix list
 print(len(trainlist))
-NAME = 'test02_dink34'
+NAME = 'final01_dink34'
 #NAME = 'log01_dink34'
 BATCHSIZE_PER_CARD = 4
 

@@ -114,15 +114,15 @@ class TTAFrame():
         
         maska = self.net.forward(img5).squeeze().cpu().data.numpy()#.squeeze(1)
         maskb = self.net.forward(img6).squeeze().cpu().data.numpy()
-        print("mask a",maska.shape)
-        print("mask b",maskb.shape)
+        #print("mask a",maska.shape)
+        #print("mask b",maskb.shape)
 
         mask1 = maska + maskb[:,:,::-1]
-        print("mask 1",mask1.shape)
+        #print("mask 1",mask1.shape)
         mask2 = mask1[:2] + mask1[2:,::-1]
-        print("mask 2",mask2.shape)
+        #print("mask 2",mask2.shape)
         mask3 = mask2[0] + np.rot90(mask2[1])[::-1,::-1]
-        print("mask 3",mask3.shape)
+        #print("mask 3",mask3.shape)
         
         return mask3
     
@@ -183,7 +183,7 @@ for i,name in enumerate(lab):
     #gt=gt>128
 
     mask = solver.test_one_img_from_path(source+name)
-    print('1',mask.shape)
+    #print('1',mask.shape)
     mask[mask>4.0] = 255
     mask[mask<=4.0] = 0
     #mask.dtype=np.uint8
@@ -191,28 +191,30 @@ for i,name in enumerate(lab):
     #print()
     #print(type(gt))
     #print(gt.dtype)
-    print('gt',gt.shape)
+    #print('gt',gt.shape)
 
     #print(type(mask))
     #print(mask.dtype)
-    print('mask',mask.shape)
+    #print('mask',mask.shape)
 
     iou_curr=jaccard_score(gt,mask,average='micro')
     prf=precision_recall_fscore_support(gt,mask,average='micro')
-
+    print(iou_curr)
+    print(prf)
+    
     iou.append(iou_curr)
     precision.append(prf[0])
     recall.append(prf[1])
     f1score.append(prf[2])
 
     print(source+name)
-    #mask = np.concatenate([mask[:,:,None],mask[:,:,None],mask[:,:,None]],axis=2)
-    break
+    mask = np.concatenate([mask[:,:,None],mask[:,:,None],mask[:,:,None]],axis=2)
+    #break
     #print(source+name, '\n',iou_curr)
     #print(target+name.rsplit('.')+'mask.png')
     #target='/content/'
     #if isFirst
-    #cv2.imwrite(target+name.rpartition('.')[0]+'_mask.png',mask.astype(np.uint8))
+    cv2.imwrite(target+name.rpartition('.')[0]+'_mask.png',mask.astype(np.uint8))
 
 with open(target+'performance_log.txt','a') as f:
   f.write(NAME+"\n")

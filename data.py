@@ -8,6 +8,7 @@ from torch.autograd import Variable as V
 import cv2
 import numpy as np
 import os
+import matplotlib.pyplot as plt
 
 def randomHueSaturationValue(image, hue_shift_limit=(-180, 180),
                              sat_shift_limit=(-255, 255),
@@ -89,10 +90,15 @@ def randomRotate90(image, mask, u=0.5):
     return image, mask
 
 def default_loader(id, root):
-
+    #print(id)
     img = cv2.imread(os.path.join(root,'{}.tif').format(id))
-    mask = cv2.imread(os.path.join(root+'{}.tiff').format(id), cv2.IMREAD_GRAYSCALE)
-
+    mask = cv2.imread(os.path.join(root,'{}.tiff').format(id), cv2.IMREAD_GRAYSCALE)
+    mask[mask>128]=255
+    mask[mask<=128]=0
+    #print(os.path.join(root,'{}.tif').format(id))
+    #print(os.path.join(root,'{}.tiff').format(id))
+    #plt.imshow(mask)
+    #exit()
     img = randomHueSaturationValue(img,
                                    hue_shift_limit=(-30, 30),
                                    sat_shift_limit=(-5, 5),
