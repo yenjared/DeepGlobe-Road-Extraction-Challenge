@@ -90,7 +90,7 @@ def randomRotate90(image, mask, u=0.5):
     return image, mask
 
 def default_loader(id, root):
-    print(id)
+    #print(id)
     img = cv2.imread(os.path.join(root,'{}.tif').format(id))
     #print(img.dtype)
     mask = cv2.imread(os.path.join(root,'{}.tiff').format(id), cv2.IMREAD_GRAYSCALE)
@@ -107,17 +107,17 @@ def default_loader(id, root):
                                    hue_shift_limit=(-30, 30),
                                    sat_shift_limit=(-5, 5),
                                    val_shift_limit=(-15, 15))
-
+    
     img, mask = randomShiftScaleRotate(img, mask,
                                        shift_limit=(-0.1, 0.1),
                                        scale_limit=(-0.1, 0.1),
                                        aspect_limit=(-0.1, 0.1),
                                        rotate_limit=(-0, 0))
+    
     img, mask = randomHorizontalFlip(img, mask)
     img, mask = randomVerticleFlip(img, mask)
     img, mask = randomRotate90(img, mask)
     """
-
     mask = np.expand_dims(mask, axis=2)
     img = np.array(img, np.float32).transpose(2,0,1)/255.0 * 3.2 - 1.6 # 0 mean normalize
     mask = np.array(mask, np.float32).transpose(2,0,1)/255.0

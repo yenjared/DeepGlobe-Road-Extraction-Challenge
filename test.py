@@ -149,83 +149,99 @@ class TTAFrame():
 
     def load(self, path):
         self.net.load_state_dict(torch.load(path, map_location=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")),strict=False)
+          
+def run():
+    source = 'dataset/test/'
+    #source = 'dataset/valid/'
+    val = os.listdir(source)
+    solver = TTAFrame(DinkNet34)
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    NAME='final03_dink34'
+    solver.load('weights/'+NAME+'.th')
+    tic = time()
+    target = 'submits/log01_dink34/'
+
+    try:
+      os.mkdir(target)
+    except:
+      pass
+
+    lab=list(filter(lambda x: x.endswith('tif'),val))
+
+    iou=[]
+    precision=[]
+    recall=[]
+    f1score=[]
+
+    for i,name in enumerate(lab):
+        if i%10 == 0:
+            print(i/10, '    ','%.2f'%(time()-tic))
+
+        gt=list(filter(lambda x: x.endswith('.tiff') 
+                            and x.find(name.rpartition('.')[0])!=-1,val))[0]
+        gt=cv2.imread(source+gt,0)
+        gt[gt>128] = 255
+        gt[gt<=128] = 0
+        #gt=gt>128
+
+        mask = solver.test_one_img_from_path(source+name)
+        plt.hist(mask)
+        print('what')
+        break
+        print('min, mean, max',
+        np.min(mask),
+        np.mean(mask),
+        np.max(mask))
         
-source = 'dataset/test/'
-#source = 'dataset/valid/'
-val = os.listdir(source)
-solver = TTAFrame(DinkNet34)
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-NAME='log01_dink34'
-solver.load('weights/'+NAME+'.th')
-tic = time()
-target = 'submits/log01_dink34/'
+        #break
+        #plt
+        #print('1',mask.shape)
 
-try:
-  os.mkdir(target)
-except:
-  pass
+        mask[mask>1.6] = 255
+        mask[mask<=1.6] = 0
 
-lab=list(filter(lambda x: x.endswith('tif'),val))
+        #mask[mask>4.0] = 255
+        #mask[mask<=4.0] = 0
 
-iou=[]
-precision=[]
-recall=[]
-f1score=[]
+        #mask.dtype=np.uint8
+        #mask=mask>128
+        #print()
+        #print(type(gt))
+        #print(gt.dtype)
+        #print('gt',gt.shape)
 
-for i,name in enumerate(lab):
-    if i%10 == 0:
-        print(i/10, '    ','%.2f'%(time()-tic))
+        #print(type(mask))
+        #print(mask.dtype)
+        #print('mask',mask.shape)
 
-    gt=list(filter(lambda x: x.endswith('.tiff') 
-                         and x.find(name.rpartition('.')[0])!=-1,val))[0]
-    gt=cv2.imread(source+gt,0)
-    gt[gt>128] = 255
-    gt[gt<=128] = 0
-    #gt=gt>128
+        iou_curr=jaccard_score(gt,mask,average='micro')
+        prf=precision_recall_fscore_support(gt,mask,average='micro')
+        print(iou_curr)
+        print(prf)
+        
+        iou.append(iou_curr)
+        precision.append(prf[0])
+        recall.append(prf[1])
+        f1score.append(prf[2])
 
-    mask = solver.test_one_img_from_path(source+name)
-    #plt
-    #print('1',mask.shape)
-    mask[mask>4.0] = 255
-    mask[mask<=4.0] = 0
-    #mask.dtype=np.uint8
-    #mask=mask>128
-    #print()
-    #print(type(gt))
-    #print(gt.dtype)
-    #print('gt',gt.shape)
+        print(source+name)
+        #plt.hist(mask)
 
-    #print(type(mask))
-    #print(mask.dtype)
-    #print('mask',mask.shape)
+        mask = np.concatenate([mask[:,:,None],mask[:,:,None],mask[:,:,None]],axis=2)
 
-    iou_curr=jaccard_score(gt,mask,average='micro')
-    prf=precision_recall_fscore_support(gt,mask,average='micro')
-    print(iou_curr)
-    print(prf)
-    
-    iou.append(iou_curr)
-    precision.append(prf[0])
-    recall.append(prf[1])
-    f1score.append(prf[2])
+        #break
+        #print(source+name, '\n',iou_curr)
+        #print(target+name.rsplit('.')+'mask.png')
+        #target='/content/'
+        #if isFirst
+        #break
+        cv2.imwrite(target+name.rpartition('.')[0]+'_mask.png',mask.astype(np.uint8))
+        
 
-    print(source+name)
-    plt.hist(mask)
-
-    mask = np.concatenate([mask[:,:,None],mask[:,:,None],mask[:,:,None]],axis=2)
-
-    #break
-    #print(source+name, '\n',iou_curr)
-    #print(target+name.rsplit('.')+'mask.png')
-    #target='/content/'
-    #if isFirst
-    break
-    cv2.imwrite(target+name.rpartition('.')[0]+'_mask.png',mask.astype(np.uint8))
-
-with open(target+'performance_log.txt','a') as f:
-  f.write(NAME+"\n")
-  f.write('IoU,P,R,F\n')
-  f.write('%s' % float('%.4g' % np.mean(np.array(iou)))+"," +
-          '%s' % float('%.4g' % np.mean(np.array(precision))) + "," +
-          '%s' % float('%.4g' % np.mean(np.array(recall)))+","+
-          '%s' % float('%.4g' % np.mean(np.array(f1score)))+"\n")  
+    with open(target+'performance_log.txt','a') as f:
+      f.write(NAME+"\n")
+      f.write('IoU,P,R,F\n')
+      f.write('%s' % float('%.4g' % np.mean(np.array(iou)))+"," +
+              '%s' % float('%.4g' % np.mean(np.array(precision))) + "," +
+              '%s' % float('%.4g' % np.mean(np.array(recall)))+","+
+              '%s' % float('%.4g' % np.mean(np.array(f1score)))+"\n")  
