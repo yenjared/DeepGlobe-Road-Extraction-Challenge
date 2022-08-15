@@ -17,6 +17,7 @@ from networks.dinknet import LinkNet34, DinkNet34, DinkNet50, DinkNet101, DinkNe
 
 from sklearn.metrics import jaccard_score, precision_recall_fscore_support
 from torchsummary import summary
+import matplotlib.pyplot as plt
 
 BATCHSIZE_PER_CARD = 4
 
@@ -147,7 +148,7 @@ class TTAFrame():
 
 
     def load(self, path):
-        self.net.load_state_dict(torch.load(path,map_location=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")))
+        self.net.load_state_dict(torch.load(path, map_location=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")),strict=False)
         
 source = 'dataset/test/'
 #source = 'dataset/valid/'
@@ -183,6 +184,7 @@ for i,name in enumerate(lab):
     #gt=gt>128
 
     mask = solver.test_one_img_from_path(source+name)
+    #plt
     #print('1',mask.shape)
     mask[mask>4.0] = 255
     mask[mask<=4.0] = 0
@@ -208,12 +210,16 @@ for i,name in enumerate(lab):
     f1score.append(prf[2])
 
     print(source+name)
+    plt.hist(mask)
+
     mask = np.concatenate([mask[:,:,None],mask[:,:,None],mask[:,:,None]],axis=2)
+
     #break
     #print(source+name, '\n',iou_curr)
     #print(target+name.rsplit('.')+'mask.png')
     #target='/content/'
     #if isFirst
+    break
     cv2.imwrite(target+name.rpartition('.')[0]+'_mask.png',mask.astype(np.uint8))
 
 with open(target+'performance_log.txt','a') as f:

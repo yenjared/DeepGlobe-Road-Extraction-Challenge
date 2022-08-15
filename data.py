@@ -90,15 +90,19 @@ def randomRotate90(image, mask, u=0.5):
     return image, mask
 
 def default_loader(id, root):
-    #print(id)
+    print(id)
     img = cv2.imread(os.path.join(root,'{}.tif').format(id))
+    #print(img.dtype)
     mask = cv2.imread(os.path.join(root,'{}.tiff').format(id), cv2.IMREAD_GRAYSCALE)
     mask[mask>128]=255
     mask[mask<=128]=0
+    #print('img mean',np.mean(mask))
+    #print('shape',mask.shape)
     #print(os.path.join(root,'{}.tif').format(id))
     #print(os.path.join(root,'{}.tiff').format(id))
     #plt.imshow(mask)
     #exit()
+    """
     img = randomHueSaturationValue(img,
                                    hue_shift_limit=(-30, 30),
                                    sat_shift_limit=(-5, 5),
@@ -112,12 +116,14 @@ def default_loader(id, root):
     img, mask = randomHorizontalFlip(img, mask)
     img, mask = randomVerticleFlip(img, mask)
     img, mask = randomRotate90(img, mask)
+    """
 
     mask = np.expand_dims(mask, axis=2)
     img = np.array(img, np.float32).transpose(2,0,1)/255.0 * 3.2 - 1.6 # 0 mean normalize
     mask = np.array(mask, np.float32).transpose(2,0,1)/255.0
     mask[mask>=0.5] = 1
     mask[mask<=0.5] = 0
+    #print('mask sum',np.sum(mask))
     #mask = abs(mask-1)
     return img, mask
 
