@@ -10,7 +10,7 @@ class MyFrame():
         self.net = net().cuda() # aka nn.Module Dinknet34 in dinknet.py
 
         #""" Pretraining code block
-        self.net.load_state_dict(torch.load('weights/log01_dink34.th'),strict=False)
+        #self.net.load_state_dict(torch.load('weights/log01_dink34.th'),strict=False)
         
         """
         for param in self.net.parameters():
