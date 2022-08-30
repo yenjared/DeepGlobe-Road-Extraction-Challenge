@@ -26,13 +26,13 @@ imagelist = filter(lambda x: x[-3:].find('tif')!=-1, os.listdir(ROOT)) # trainin
 trainlist = list(map(lambda x: x.rpartition('.')[0], imagelist)) # label prefix list
 print(len(trainlist))
 #NAME = 'test03_dink34'
-NAME = 'toronto01_dink34'
+NAME = 'postencode01_dink34'
 #NAME = 'log01_dink34'
 BATCHSIZE_PER_CARD = 4
 
 # MyFrame from framework.py
 # uses D-LinkNet34, dice binary cross entropy loss function and 2e-4 learning rate
-solver = MyFrame(DinkNet34, dice_bce_loss, 2e-5) # TUNE LEARNING RATE
+solver = MyFrame(DinkNet34, dice_bce_loss, 2e-3) # TUNE LEARNING RATE
 batchsize = torch.cuda.device_count() * BATCHSIZE_PER_CARD
 
 # torch.utils.data.Dataset abstract class instance, returns image and label, in data.py

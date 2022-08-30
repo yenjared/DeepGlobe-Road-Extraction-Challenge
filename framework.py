@@ -10,12 +10,29 @@ class MyFrame():
         self.net = net().cuda() # aka nn.Module Dinknet34 in dinknet.py
 
         #""" Pretraining code block
-        #self.net.load_state_dict(torch.load('weights/log01_dink34.th'),strict=False)
+        self.net.load_state_dict(torch.load('weights/log01_dink34.th'),strict=False)
         
-        """
+        #"""
         for param in self.net.parameters():
             param.requires_grad = False
           # Replace last fully connected convolution layer
+        filters = [64, 128, 256, 512]
+        #resnet = models.resnet34(pretrained=True)
+        #self.firstconv = resnet.conv1
+        #self.firstbn = resnet.bn1
+        #self.firstrelu = resnet.relu
+        #self.firstmaxpool = resnet.maxpool
+        #self.encoder1 = resnet.layer1
+        #self.encoder2 = resnet.layer2
+        #self.encoder3 = resnet.layer3
+        #self.encoder4 = resnet.layer4
+        
+        self.dblock = Dblock(512)
+
+        self.decoder4 = DecoderBlock(filters[3], filters[2])
+        self.decoder3 = DecoderBlock(filters[2], filters[1])
+        self.decoder2 = DecoderBlock(filters[1], filters[0])
+        self.decoder1 = DecoderBlock(filters[0], filters[0])
         self.net.finalconv3 = nn.Conv2d(32, 1, 3, padding=1)
         #"""
         
