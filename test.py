@@ -156,7 +156,7 @@ def run():
     val = os.listdir(source)
     solver = TTAFrame(DinkNet34)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    NAME='toronto01_dink34'
+    NAME='log01_dink34'
     print('weights/'+NAME+'.th')
     solver.load('weights/'+NAME+'.th')
     tic = time()
@@ -187,7 +187,7 @@ def run():
 
         mask = solver.test_one_img_from_path(source+name)
         #plt.hist(mask)
-        print('what')
+        #print('what')
         #return mask
         #break
         print('min, mean, max',
