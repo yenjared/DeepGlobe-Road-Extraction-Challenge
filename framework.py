@@ -20,7 +20,7 @@ class MyFrame():
         #""" Pretraining code block
         self.net.load_state_dict(torch.load('weights/log01_dink34.th'),strict=False)
         
-        """
+        
         for param in self.net.parameters():
             param.requires_grad = False
           # Replace last fully connected convolution layer

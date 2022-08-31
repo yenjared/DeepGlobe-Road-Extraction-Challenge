@@ -170,3 +170,9 @@ IoU,P,R,F
 log01_dink34
 IoU,P,R,F
 0.6142,0.7592,0.7994,0.7406
+bottomelim02_dink34
+IoU,P,R,F
+0.7803,0.9532,0.8155,0.8677
+bottomelim03_dink34
+IoU,P,R,F
+0.769,0.956,0.8012,0.8549
