@@ -50,9 +50,9 @@ class MyFrame():
         self.net.finalconv3 = nn.Conv2d(32, 1, 3, padding=1)
         #"""
         
-        print('=== Frozen layers ===')
+        print('=== Unfrozen layers ===')
         for name, param in self.net.named_parameters():
-            if param.requires_grad==False:
+            if param.requires_grad:
                 print(name)
         print('=======================')
         self.net = torch.nn.DataParallel(self.net, device_ids=range(torch.cuda.device_count()))
