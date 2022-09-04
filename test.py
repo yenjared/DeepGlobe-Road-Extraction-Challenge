@@ -16,7 +16,7 @@ from networks.dunet import Dunet
 from networks.dinknet import LinkNet34, DinkNet34, DinkNet50, DinkNet101, DinkNet34_less_pool
 
 from sklearn.metrics import jaccard_score, precision_recall_fscore_support
-from torchsummary import summary
+#from torchsummary import summary
 import matplotlib.pyplot as plt
 
 BATCHSIZE_PER_CARD = 4
@@ -157,7 +157,7 @@ def run():
     val = os.listdir(source)
     solver = TTAFrame(DinkNet34)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    NAME='first02_dink34'
+    NAME='log01_dink34'
     print('weights/'+NAME+'.th')
     solver.load('weights/'+NAME+'.th')
     tic = time()
@@ -231,6 +231,7 @@ def run():
             print(source+name)
             #plt.hist(mask)
         else:
+            print('Writing masks for merge')
             mask=mask*31.875 # Stretch from [0,8] to [0,255]
 
         mask = np.concatenate([mask[:,:,None],mask[:,:,None],mask[:,:,None]],axis=2)
