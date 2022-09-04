@@ -34,7 +34,7 @@ class TTAFrame():
         #batchsize = torch.cuda.device_count() * BATCHSIZE_PER_CARD
         batchsize = BATCHSIZE_PER_CARD
         #batchsize = BATCHSIZE_PER_CARD if torch.cuda.is_available() else BATCHSIZE_PER_CARD * torch.cuda.device_count()
-        
+
         if batchsize >= 8:
             return self.test_one_img_from_path_1(path)
         elif batchsize >= 4:
@@ -50,25 +50,25 @@ class TTAFrame():
         img2 = np.array(img1)[:,::-1]
         img3 = np.array(img1)[:,:,::-1]
         img4 = np.array(img2)[:,:,::-1]
-        
+
         img1 = img1.transpose(0,3,1,2)
         img2 = img2.transpose(0,3,1,2)
         img3 = img3.transpose(0,3,1,2)
         img4 = img4.transpose(0,3,1,2)
-        
+
         img1 = V(torch.Tensor(np.array(img1, np.float32)/255.0 * 3.2 -1.6).cuda())
         img2 = V(torch.Tensor(np.array(img2, np.float32)/255.0 * 3.2 -1.6).cuda())
         img3 = V(torch.Tensor(np.array(img3, np.float32)/255.0 * 3.2 -1.6).cuda())
         img4 = V(torch.Tensor(np.array(img4, np.float32)/255.0 * 3.2 -1.6).cuda())
-        
+
         maska = self.net.forward(img1).squeeze().cpu().data.numpy()
         maskb = self.net.forward(img2).squeeze().cpu().data.numpy()
         maskc = self.net.forward(img3).squeeze().cpu().data.numpy()
         maskd = self.net.forward(img4).squeeze().cpu().data.numpy()
-        
+
         mask1 = maska + maskb[:,::-1] + maskc[:,:,::-1] + maskd[:,::-1,::-1]
         mask2 = mask1[0] + np.rot90(mask1[1])[::-1,::-1]
-        
+
         return mask2
 
     def test_one_img_from_path_4(self, path):
@@ -78,27 +78,27 @@ class TTAFrame():
         img2 = np.array(img1)[:,::-1]
         img3 = np.array(img1)[:,:,::-1]
         img4 = np.array(img2)[:,:,::-1]
-        
+
         img1 = img1.transpose(0,3,1,2)
         img2 = img2.transpose(0,3,1,2)
         img3 = img3.transpose(0,3,1,2)
         img4 = img4.transpose(0,3,1,2)
-        
+
         img1 = V(torch.Tensor(np.array(img1, np.float32)/255.0 * 3.2 -1.6).cuda())
         img2 = V(torch.Tensor(np.array(img2, np.float32)/255.0 * 3.2 -1.6).cuda())
         img3 = V(torch.Tensor(np.array(img3, np.float32)/255.0 * 3.2 -1.6).cuda())
         img4 = V(torch.Tensor(np.array(img4, np.float32)/255.0 * 3.2 -1.6).cuda())
-        
+
         maska = self.net.forward(img1).squeeze().cpu().data.numpy()
         maskb = self.net.forward(img2).squeeze().cpu().data.numpy()
         maskc = self.net.forward(img3).squeeze().cpu().data.numpy()
         maskd = self.net.forward(img4).squeeze().cpu().data.numpy()
-        
+
         mask1 = maska + maskb[:,::-1] + maskc[:,:,::-1] + maskd[:,::-1,::-1]
         mask2 = mask1[0] + np.rot90(mask1[1])[::-1,::-1]
-        
+
         return mask2
-    
+
     def test_one_img_from_path_2(self, path):
         img = cv2.imread(path)#.transpose(2,0,1)[None]
         img90 = np.array(np.rot90(img))
@@ -112,7 +112,7 @@ class TTAFrame():
         img6 = img4.transpose(0,3,1,2)
         img6 = np.array(img6, np.float32)/255.0 * 3.2 -1.6
         img6 = V(torch.Tensor(img6).cuda())
-        
+
         maska = self.net.forward(img5).squeeze().cpu().data.numpy()#.squeeze(1)
         maskb = self.net.forward(img6).squeeze().cpu().data.numpy()
         #print("mask a",maska.shape)
@@ -124,12 +124,12 @@ class TTAFrame():
         #print("mask 2",mask2.shape)
         mask3 = mask2[0] + np.rot90(mask2[1])[::-1,::-1]
         #print("mask 3",mask3.shape)
-        
+
         return mask3
-    
+
     def test_one_img_from_path_1(self, path):
         img = cv2.imread(path)#.transpose(2,0,1)[None]
-        
+
         img90 = np.array(np.rot90(img))
         img1 = np.concatenate([img[None],img90[None]])
         img2 = np.array(img1)[:,::-1]
@@ -138,19 +138,20 @@ class TTAFrame():
         img5 = np.concatenate([img3,img4]).transpose(0,3,1,2)
         img5 = np.array(img5, np.float32)/255.0 * 3.2 -1.6
         img5 = V(torch.Tensor(img5).cuda())
-        
+
         mask = self.net.forward(img5).squeeze().cpu().data.numpy()#.squeeze(1)
         mask1 = mask[:4] + mask[4:,:,::-1]
         mask2 = mask1[:2] + mask1[2:,::-1]
         mask3 = mask2[0] + np.rot90(mask2[1])[::-1,::-1]
-        
+
         return mask3
 
 
     def load(self, path):
         self.net.load_state_dict(torch.load(path, map_location=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")),strict=False)
-          
+
 def run():
+    TESTING=False
     source = 'dataset/test/'
     #source = 'dataset/valid/'
     val = os.listdir(source)
@@ -178,11 +179,7 @@ def run():
         if i%10 == 0:
             print(i/10, ' fuckyou   ','%.2f'%(time()-tic))
 
-        gt=list(filter(lambda x: x.endswith('.tiff') 
-                            and x.find(name.rpartition('.')[0])!=-1,val))[0]
-        gt=cv2.imread(source+gt,0)
-        gt[gt>128] = 255
-        gt[gt<=128] = 0
+
         #gt=gt>128
 
         mask = solver.test_one_img_from_path(source+name)
@@ -194,58 +191,65 @@ def run():
         np.min(mask),
         np.mean(mask),
         np.max(mask))
-        
+
         #break
         #plt
         #print('1',mask.shape)
 
         #mask[mask>1.6] = 255
         #mask[mask<=1.6] = 0
+        if TESTING:
+            gt=list(filter(lambda x: x.endswith('.tiff')
+            and x.find(name.rpartition('.')[0])!=-1,val))[0]
+            gt=cv2.imread(source+gt,0)
+            gt[gt>128] = 255
+            gt[gt<=128] = 0
+            mask[mask>4.0] = 255
+            mask[mask<=4.0] = 0
 
-        mask[mask>4.0] = 255
-        mask[mask<=4.0] = 0
+            #mask.dtype=np.uint8
+            #mask=mask>128
+            #print()
+            #print(type(gt))
+            #print(gt.dtype)
+            #print('gt',gt.shape)
 
-        #mask.dtype=np.uint8
-        #mask=mask>128
-        #print()
-        #print(type(gt))
-        #print(gt.dtype)
-        #print('gt',gt.shape)
+            #print(type(mask))
+            #print(mask.dtype)
+            #print('mask',mask.shape)
 
-        #print(type(mask))
-        #print(mask.dtype)
-        #print('mask',mask.shape)
+            iou_curr=jaccard_score(gt,mask,average='micro')
+            prf=precision_recall_fscore_support(gt,mask,average='micro')
+            print(iou_curr)
+            print(prf)
 
-        iou_curr=jaccard_score(gt,mask,average='micro')
-        prf=precision_recall_fscore_support(gt,mask,average='micro')
-        print(iou_curr)
-        print(prf)
-        
-        iou.append(iou_curr)
-        precision.append(prf[0])
-        recall.append(prf[1])
-        f1score.append(prf[2])
+            iou.append(iou_curr)
+            precision.append(prf[0])
+            recall.append(prf[1])
+            f1score.append(prf[2])
 
-        print(source+name)
-        #plt.hist(mask)
+            print(source+name)
+            #plt.hist(mask)
+        else:
+            mask=mask*31.875 # Stretch from [0,8] to [0,255]
 
         mask = np.concatenate([mask[:,:,None],mask[:,:,None],mask[:,:,None]],axis=2)
 
-        #break
-        #print(source+name, '\n',iou_curr)
-        #print(target+name.rsplit('.')+'mask.png')
-        #target='/content/'
-        #if isFirst
-        #break
+            #break
+            #print(source+name, '\n',iou_curr)
+            #print(target+name.rsplit('.')+'mask.png')
+            #target='/content/'
+            #if isFirst
+            #break
         cv2.imwrite(target+name.rpartition('.')[0]+'_mask.png',mask.astype(np.uint8))
-        
 
-    with open(target+'performance_log.txt','a') as f:
-      f.write(NAME+"\n")
-      f.write('IoU,P,R,F\n')
-      f.write('%s' % float('%.4g' % np.mean(np.array(iou)))+"," +
-              '%s' % float('%.4g' % np.mean(np.array(precision))) + "," +
-              '%s' % float('%.4g' % np.mean(np.array(recall)))+","+
-              '%s' % float('%.4g' % np.mean(np.array(f1score)))+"\n")  
+    if TESTING:
+        with open(target+'performance_log.txt','a') as f:
+          f.write(NAME+"\n")
+          f.write('IoU,P,R,F\n')
+          f.write('%s' % float('%.4g' % np.mean(np.array(iou)))+"," +
+                  '%s' % float('%.4g' % np.mean(np.array(precision))) + "," +
+                  '%s' % float('%.4g' % np.mean(np.array(recall)))+","+
+                  '%s' % float('%.4g' % np.mean(np.array(f1score)))+"\n")
 print('fuck')
 run()
