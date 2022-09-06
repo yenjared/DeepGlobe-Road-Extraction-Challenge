@@ -179,6 +179,7 @@ def run():
     def myTile(file,img,tile):
         index=int(file.split('_')[-2])
         #img=cv2.imread(os.path.join(source,file),0)
+        print('Index:',index)
         if index == 0:
             tile[:1024,:1024]+=img
         elif index==1:
@@ -204,9 +205,11 @@ def run():
     for i,name in enumerate(lab):
         if i%10 == 0:
             print(i/10, ' fuckyou   ','%.2f'%(time()-tic))
-
+        if i==4:
+            exit()
 
         mask = solver.test_one_img_from_path(source+name) 
+        print(source+name)
         print('min, mean, max',np.min(mask),np.mean(mask),np.max(mask))
 
         if TESTING:
