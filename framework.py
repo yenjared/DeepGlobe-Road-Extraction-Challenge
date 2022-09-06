@@ -23,7 +23,7 @@ class MyFrame():
         
         for param in self.net.parameters():
             param.requires_grad = False
-          # Replace last fully connected convolution layer
+            
         filters = [64, 128, 256, 512]
         resnet = models.resnet34(pretrained=True)
         #self.net.firstconv = resnet.conv1
@@ -48,7 +48,6 @@ class MyFrame():
         self.net.finalconv2 = nn.Conv2d(32, 32, 3, padding=1)
         self.net.finalrelu2 = nonlinearity
         self.net.finalconv3 = nn.Conv2d(32, 1, 3, padding=1)
-        #"""
         
         print('=== Unfrozen layers ===')
         for name, param in self.net.named_parameters():

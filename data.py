@@ -96,13 +96,7 @@ def default_loader(id, root):
     mask = cv2.imread(os.path.join(root,'{}.tiff').format(id), cv2.IMREAD_GRAYSCALE)
     mask[mask>128]=255
     mask[mask<=128]=0
-    #print('img mean',np.mean(mask))
-    #print('shape',mask.shape)
-    #print(os.path.join(root,'{}.tif').format(id))
-    #print(os.path.join(root,'{}.tiff').format(id))
-    #plt.imshow(mask)
-    #exit()
-    """
+    """ Data Augmentation Block
     img = randomHueSaturationValue(img,
                                    hue_shift_limit=(-30, 30),
                                    sat_shift_limit=(-5, 5),
@@ -123,7 +117,6 @@ def default_loader(id, root):
     mask = np.array(mask, np.float32).transpose(2,0,1)/255.0
     mask[mask>=0.5] = 1
     mask[mask<=0.5] = 0
-    #print('mask sum',np.sum(mask))
     #mask = abs(mask-1)
     return img, mask
 
