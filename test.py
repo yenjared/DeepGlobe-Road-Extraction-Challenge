@@ -153,16 +153,17 @@ class TTAFrame():
         self.net.load_state_dict(torch.load(path, map_location=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")),strict=False)
 
 def run():
-
-    
     source='dataset/test/' if TESTING else 'dataset/infer/'
+    print(source)
     #source = 'dataset/valid/'
     val = os.listdir(source)
+    val=sorted(val, key = lambda x: (isinstance(x, str), x))
     solver = TTAFrame(DinkNet34)
     #device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     #NAME='log01_dink34'
     print('weights/'+NAME+'.th')
     solver.load('weights/'+NAME+'.th')
+    print('fuck')
     tic = time()
     target = os.path.join('submits',NAME)
 
@@ -177,7 +178,7 @@ def run():
     isFirst=True
 
     def myTile(file,img,tile):
-        index=int(file.split('_')[-2])
+        index=int(file.rpartition('.')[0].split('_')[-1])
         #img=cv2.imread(os.path.join(source,file),0)
         print('Index:',index)
         if index == 0:
@@ -196,7 +197,7 @@ def run():
       pass
 
     lab=list(filter(lambda x: x.endswith('tif'),val))
-
+    print(lab)
     iou=[]
     precision=[]
     recall=[]
@@ -205,12 +206,14 @@ def run():
     for i,name in enumerate(lab):
         if i%10 == 0:
             print(i/10, ' fuckyou   ','%.2f'%(time()-tic))
-        if i==4:
+        if i==5:
             exit()
 
         mask = solver.test_one_img_from_path(source+name) 
         print(source+name)
         print('min, mean, max',np.min(mask),np.mean(mask),np.max(mask))
+        mask*=31.875
+
 
         if TESTING:
             gt=list(filter(lambda x: x.endswith('.tiff')
@@ -235,23 +238,27 @@ def run():
             cv2.imwrite(os.path.join(target,name.rpartition('.')[0]+'_mask.png'),mask.astype(np.uint8))
         
         else:
+          
             if isFirst:
 
                 isFirst=False
-                curr_file=name.rsplit('_',2)[0]
+                curr_file=name.rsplit('_',1)[0]
                 parent_file=curr_file
 
                 tile=np.zeros([1536,2048])
                 tile=myTile(name,mask,tile)
 
             else:
-                curr_name=name.rsplit('_',2)[0]
-                if curr_name == parent_file:
+                curr_file=name.rsplit('_',1)[0]
+                if curr_file == parent_file:
                     tile=myTile(name,mask,tile)
                 else:
-                    mask=np.divide(tile,overlap_arr)                    
-                    mask=cv2.resize(tile,(14204,10652),interpolation=cv2.INTER_LINEAR)
-                    
+                    print('Merging '+parent_file)
+                    tile=np.divide(tile,overlap_arr)                    
+                    tile=cv2.resize(tile,(14204,10652),interpolation=cv2.INTER_LINEAR)
+                    if not FUZZY:
+                        tile[tile>=128]=255
+                        tile[tile<128]=0
                     cv2.imwrite(os.path.join(target,parent_file.split('_',1)[1]+'_'+EXT+'.png'),
                                 tile.astype(np.uint8))
                     
@@ -261,14 +268,17 @@ def run():
                     parent_file=curr_file
                     
                 if i == len(lab)-1:
+                    print('Merging '+parent_file)
                     tile=np.divide(tile,overlap_arr)              
                     tile=cv2.resize(tile,(14204,10652),interpolation=cv2.INTER_LINEAR)
-                    
+                    if not FUZZY:
+                        tile[tile>=128]=255
+                        tile[tile<128]=0
                     cv2.imwrite(os.path.join(target,parent_file.split('_',1)[1]+'_'+EXT+'.png'),
                                 mask.astype(np.uint8))
 
     if TESTING:
-        with open(target+'performance_log.txt','a') as f:
+        with open(os.path.join(target,'performance_log.txt'),'a') as f:
           f.write(NAME+"\n")
           f.write('IoU,P,R,F\n')
           f.write('%s' % float('%.4g' % np.mean(np.array(iou)))+"," +
@@ -287,6 +297,6 @@ args = parser.parse_args()
 TESTING=args.mode==1
 NAME=args.model
 
-print(args.mode,args.model)
-exit()
+print(Runningargs.mode,args.model)
+#exit()
 run()
