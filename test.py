@@ -176,9 +176,9 @@ def run():
     EXT = 'fuzzy' if FUZZY else 'mask'
     isFirst=True
 
-    def myTile(file,tile):
+    def myTile(file,img,tile):
         index=int(file.split('_')[-2])
-        img=cv2.imread(os.path.join(source,file),0)
+        #img=cv2.imread(os.path.join(source,file),0)
         if index == 0:
             tile[:1024,:1024]+=img
         elif index==1:
@@ -238,28 +238,28 @@ def run():
                 curr_file=name.rsplit('_',2)[0]
                 parent_file=curr_file
 
-                mask=np.zeros([1536,2048])
-                mask=myTile(name,mask)
+                tile=np.zeros([1536,2048])
+                tile=myTile(name,mask,tile)
 
             else:
                 curr_name=name.rsplit('_',2)[0]
                 if curr_name == parent_file:
-                    mask=myTile(name,mask)
+                    tile=myTile(name,mask,tile)
                 else:
-                    mask=np.divide(mask,overlap_arr)                    
-                    mask=cv2.resize(mask,(14204,10652),interpolation=cv2.INTER_LINEAR)
+                    mask=np.divide(tile,overlap_arr)                    
+                    mask=cv2.resize(tile,(14204,10652),interpolation=cv2.INTER_LINEAR)
                     
                     cv2.imwrite(os.path.join(target,parent_file.split('_',1)[1]+'_'+EXT+'.png'),
-                                mask.astype(np.uint8))
+                                tile.astype(np.uint8))
                     
-                    mask=np.zeros([1536,2048])
-                    mask=myTile(name,mask)
+                    tile=np.zeros([1536,2048])
+                    tile=myTile(name,mask,tile)
                     
                     parent_file=curr_file
                     
                 if i == len(lab)-1:
-                    mask=np.divide(mask,overlap_arr)              
-                    mask=cv2.resize(mask,(14204,10652),interpolation=cv2.INTER_LINEAR)
+                    tile=np.divide(tile,overlap_arr)              
+                    tile=cv2.resize(tile,(14204,10652),interpolation=cv2.INTER_LINEAR)
                     
                     cv2.imwrite(os.path.join(target,parent_file.split('_',1)[1]+'_'+EXT+'.png'),
                                 mask.astype(np.uint8))
