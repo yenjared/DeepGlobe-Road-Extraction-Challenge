@@ -205,8 +205,9 @@ def run():
 
     for i,name in enumerate(lab):
         if i%10 == 0:
-            print(i/10, ' fuckyou   ','%.2f'%(time()-tic))
+            print(i/10, ' fuckyou   ','%.4f'%(time()-tic))
         if i==5:
+            print('%.2f'%(time()-tic))
             exit()
 
         mask = solver.test_one_img_from_path(source+name) 
@@ -297,6 +298,6 @@ args = parser.parse_args()
 TESTING=args.mode==1
 NAME=args.model
 
-print(Runningargs.mode,args.model)
+print('Testing model ',args.model) if TESTING else print('Inferring', args.model)
 #exit()
 run()
