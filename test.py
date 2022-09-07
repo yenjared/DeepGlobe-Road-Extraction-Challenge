@@ -302,6 +302,6 @@ args = parser.parse_args()
 TESTING=args.mode==1
 NAME=args.model
 
-print('Testing road extraction model ',args.model) if TESTING else print('Inferring roads from images', args.model)
+print('Testing road extraction model ',args.model) if TESTING else print('Extracting roads from images with model', args.model)
 print("=================================================")
 run()
