@@ -6,7 +6,7 @@ from torch.autograd import Variable as V
 import cv2
 import os
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import pickle
 
 from time import time
