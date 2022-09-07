@@ -206,9 +206,9 @@ def run():
     for i,name in enumerate(lab):
         if i%10 == 0:
             print(i/10, ' fuckyou   ','%.4f'%(time()-tic))
-        if i==5:
-            print('%.2f'%(time()-tic))
-            exit()
+        #if i==5:
+        #    print('%.2f'%(time()-tic))
+        #    exit()
 
         mask = solver.test_one_img_from_path(source+name) 
         print(source+name)
