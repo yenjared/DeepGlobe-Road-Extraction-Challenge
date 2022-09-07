@@ -153,17 +153,29 @@ class TTAFrame():
         self.net.load_state_dict(torch.load(path, map_location=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")),strict=False)
 
 def run():
+    def myTile(file,img,tile):
+        index=int(file.rpartition('.')[0].split('_')[-1])
+        #img=cv2.imread(os.path.join(source,file),0)
+        #print('Index:',index)
+        if index == 0:
+            tile[:1024,:1024]+=img
+        elif index==1:
+            tile[:1024,-1024:]+=img
+        elif index==2:
+            tile[-1024:,:1024]+=img
+        elif index==3:
+            tile[-1024:,-1024:]+=img
+        return tile
+
     source='dataset/test/' if TESTING else 'dataset/infer/'
-    print(source)
     #source = 'dataset/valid/'
+
     val = os.listdir(source)
     val=sorted(val, key = lambda x: (isinstance(x, str), x))
+
     solver = TTAFrame(DinkNet34)
-    #device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     #NAME='log01_dink34'
-    print('weights/'+NAME+'.th')
     solver.load('weights/'+NAME+'.th')
-    print('fuck')
     tic = time()
     target = os.path.join('submits',NAME)
 
@@ -177,27 +189,18 @@ def run():
     EXT = 'fuzzy' if FUZZY else 'mask'
     isFirst=True
 
-    def myTile(file,img,tile):
-        index=int(file.rpartition('.')[0].split('_')[-1])
-        #img=cv2.imread(os.path.join(source,file),0)
-        print('Index:',index)
-        if index == 0:
-            tile[:1024,:1024]+=img
-        elif index==1:
-            tile[:1024,-1024:]+=img
-        elif index==2:
-            tile[-1024:,:1024]+=img
-        elif index==3:
-            tile[-1024:,-1024:]+=img
-        return tile
-
     try:
       os.mkdir(target)
     except:
       pass
 
+    print('Input: 1024x1024 .tifs in',os.path.abspath(source))
+    print("-------------------------------------------------")
+    print('Output: 14204x10652 .png masks in', os.path.abspath(target))
+    print("-------------------------------------------------")
+
     lab=list(filter(lambda x: x.endswith('tif'),val))
-    print(lab)
+    #print(lab)
     iou=[]
     precision=[]
     recall=[]
@@ -205,14 +208,15 @@ def run():
 
     for i,name in enumerate(lab):
         if i%10 == 0:
-            print(i/10, ' fuckyou   ','%.4f'%(time()-tic))
+            print(f'Image '+str(i)+'/'+str(len(lab))+', ','%.2f'%(time()-tic),'seconds')
         #if i==5:
         #    print('%.2f'%(time()-tic))
         #    exit()
 
         mask = solver.test_one_img_from_path(source+name) 
-        print(source+name)
-        print('min, mean, max',np.min(mask),np.mean(mask),np.max(mask))
+        #print(source+name)
+        #print('min, mean, max |',np.min(mask),np.mean(mask),np.max(mask))
+
         mask*=31.875
 
 
@@ -254,7 +258,7 @@ def run():
                 if curr_file == parent_file:
                     tile=myTile(name,mask,tile)
                 else:
-                    print('Merging '+parent_file)
+                    print('Merging '+parent_file.split('_',1)[1])
                     tile=np.divide(tile,overlap_arr)                    
                     tile=cv2.resize(tile,(14204,10652),interpolation=cv2.INTER_LINEAR)
                     if not FUZZY:
@@ -269,7 +273,7 @@ def run():
                     parent_file=curr_file
                     
                 if i == len(lab)-1:
-                    print('Merging '+parent_file)
+                    print('Merging '+parent_file.split('_',1)[1])
                     tile=np.divide(tile,overlap_arr)              
                     tile=cv2.resize(tile,(14204,10652),interpolation=cv2.INTER_LINEAR)
                     if not FUZZY:
@@ -277,6 +281,8 @@ def run():
                         tile[tile<128]=0
                     cv2.imwrite(os.path.join(target,parent_file.split('_',1)[1]+'_'+EXT+'.png'),
                                 mask.astype(np.uint8))
+                    print("=================================================")
+                    print("Finish!")
 
     if TESTING:
         with open(os.path.join(target,'performance_log.txt'),'a') as f:
@@ -287,8 +293,6 @@ def run():
                   '%s' % float('%.4g' % np.mean(np.array(recall)))+","+
                   '%s' % float('%.4g' % np.mean(np.array(f1score)))+"\n")
 
-print('fuck')
-
 parser = argparse.ArgumentParser()
 parser.add_argument("model",help="name of model without file extension")
 parser.add_argument("mode", help="0 for inference, 1 for testing",
@@ -298,6 +302,6 @@ args = parser.parse_args()
 TESTING=args.mode==1
 NAME=args.model
 
-print('Testing model ',args.model) if TESTING else print('Inferring', args.model)
-#exit()
+print('Testing road extraction model ',args.model) if TESTING else print('Inferring roads from images', args.model)
+print("=================================================")
 run()
