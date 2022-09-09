@@ -103,14 +103,13 @@ def resize_crop_train_test(inpath,outpath):
         print(f"{excl_count} resized crops omitted")
 
 def resize_crop_infer(inpath,outpath):
-    #files=os.listdir(path)
-    #print(files)
-    #files=list(filter(lambda x: x.endswith('.tif') or x.endswith('.tiff'),files))
-    #files=list(filter(lambda x: x.endswith('.tiff'),files))
-    #path=os.path.join(inpath,d)
+"""resize_crop_infer(inpath,outpath)
+    Resize PhaseOne images in inpath to 0.5m GSD of DeepGlobe then slices out 1024 x 1024 crop out of corners
+    Input: inpath - path to PhaseOne images
+    Output: outpath - path to folder to output crops
+"""
     files=os.listdir(inpath)
-    #count=0
-    #excl_count=0
+
     for file in files:
         (pre,sep,suf)=file.rpartition('.')
         if suf=='tif':
@@ -118,35 +117,6 @@ def resize_crop_infer(inpath,outpath):
             imgs=p1_to_deepglobe(os.path.join(inpath,file))
             for i,img in enumerate(imgs):
                 cv2.imwrite(os.path.join(outpath,'RSZ_'+pre+'_'+str(i)+'.tif'),img)
-        #(pre,sep,suf)=file.rpartition('.')
-        #print(pre,sep,suf)
-        #if pre[-4:].isnumeric() and suf=='tif':
-            #print(pre)
-            #img=p1_to_deepglobe(os.path.join(path,file))
-            #lab=p1_to_deepglobe(os.path.join(path,pre+'_road.tif'))
-            #count+=1
-            #for i,r in enumerate(lab):
-                #if np.sum(r)>0 or not trainmode:
-                    #print(os.path.join(path,'resize','RSZ_'+pre+'_'+str(i)+sep+suf))
-                    #cv2.imwrite(os.path.join(outpath,d,'RSZ_'+pre+'_'+str(i)+'.tif'),img[i]) 
-                    #cv2.imwrite(os.path.join(outpath,d,'RSZ_'+pre+'_'+str(i)+'.tiff'),r)
-                #else:
-                    #excl_count+=1
-                    #print(pre+'_'+str(i),f"\n{excl_count} label(s) with no roads detected and omitted")
-        #print(r.shape)
-        #break
-#resize_crop_infer('E:/infer/','E:/infer/rsz')
-
-
-
-
-
-#resize_crop_train_test('C:/labels','C:/labels/set1')
-
-
-
-
-
 
 def merge_masks(inpath,outpath):
     """merge_masks(inpath):
@@ -278,39 +248,3 @@ parser.add_argument("inpath",help="path to masks_instances folder")
 
 args = parser.parse_args()
 crops_to_phaseone(args.inpath)
-            #curr_file = crop[:41]
-            # print(crop)
-#            if isFirst:                    # print(len(crops))
-#                isFirst = False
-#                tile = np.zeros((10652, 14204, 3), dtype=np.uint8)
-#                index = int(crop.split('_')[-2].split('_')[-1])
-#                row = math.floor(index/4)
-#                col = index-(row)*4
-#                tile[row*2663:(row+1)*2663, col*3551:(col+1) *
-#                     3551, :] = cv2.imread(os.path.join(path,crop))
-#                parent_file = crop[:41]
-#      #          print("New source image detected:", src)
-#            if curr_file == parent_file:
-#                row = math.floor(index/4)
-#                col = index-(row)*4
-#                tile[row*2663:(row+1)*2663, col*3551:(col+1) *
-#                     3551, :] = cv2.imread(os.path.join(path,crop))
-#            else:
-#                cv2.imwrite(os.path.join(outpath,parent_file+".tiff"), tile)
-#                parent_file = curr_file
-#                tile = np.zeros((10652, 14204, 3), dtype=np.uint8)
-#                index = int(crop.split('_')[-2].split('_')[-1])
-#                row = math.floor(index/4)
-#                col = index-(row)*4
-#                tile[row*2663:(row+1)*2663, col*3551:(col+1) *
-#                     3551, :] = cv2.imread(os.path.join(path,crop))
-#            if i == len(files)-1:
-#                cv2.imwrite(os.path.join(outpath,parent_file+".tiff"), tile)
-
-
-
-
-
-
-
-
