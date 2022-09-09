@@ -220,7 +220,7 @@ def run():
         mask*=31.875
 
 
-        if TESTING:
+        if args.mode==2:
             gt=list(filter(lambda x: x.endswith('.tiff')
             and x.find(name.rpartition('.')[0])!=-1,val))[0]
             gt=cv2.imread(source+gt,0)
@@ -241,8 +241,9 @@ def run():
 
             mask = np.concatenate([mask[:,:,None],mask[:,:,None],mask[:,:,None]],axis=2)
             cv2.imwrite(os.path.join(target,name.rpartition('.')[0]+'_mask.png'),mask.astype(np.uint8))
-        
-        else:
+        elif args.mode==1:
+            cv2.imwrite(os.path.join(target,name.rpartition('.')[0]+'_mask.png'),mask.astype(np.uint8))
+        elif args.mode==2:
           
             if isFirst:
 
@@ -295,11 +296,11 @@ def run():
 
 parser = argparse.ArgumentParser()
 parser.add_argument("model",help="name of model without file extension")
-parser.add_argument("mode", help="0 for inference, 1 for testing",
+parser.add_argument("mode", help="0 for inference w/ merging, 1 for inference w/o merging, 2 for testing",
                     type=int)
 
 args = parser.parse_args()
-TESTING=args.mode==1
+TESTING=args.mode==2
 NAME=args.model
 
 print('Testing road extraction model ',args.model) if TESTING else print('Extracting roads from images with model', args.model)

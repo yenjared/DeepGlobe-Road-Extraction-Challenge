@@ -90,9 +90,7 @@ def randomRotate90(image, mask, u=0.5):
     return image, mask
 
 def default_loader(id, root):
-    #print(id)
     img = cv2.imread(os.path.join(root,'{}.tif').format(id))
-    #print(img.dtype)
     mask = cv2.imread(os.path.join(root,'{}.tiff').format(id), cv2.IMREAD_GRAYSCALE)
     mask[mask>128]=255
     mask[mask<=128]=0

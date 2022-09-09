@@ -17,7 +17,7 @@ class MyFrame():
     def __init__(self, net, loss, lr=2e-4, evalmode = False):
         self.net = net().cuda() # aka nn.Module Dinknet34 in dinknet.py
 
-        #""" Pretraining code block
+        #""" Start of Fine-tuning block
         self.net.load_state_dict(torch.load('weights/log01_dink34.th'),strict=False)
         
         
@@ -54,6 +54,7 @@ class MyFrame():
             if param.requires_grad:
                 print(name)
         print('=======================')
+        #""" End of Fine-Tuning Block
         self.net = torch.nn.DataParallel(self.net, device_ids=range(torch.cuda.device_count()))
         self.optimizer = torch.optim.Adam(params=self.net.parameters(), lr=lr)
         #self.optimizer = torch.optim.RMSprop(params=self.net.parameters(), lr=lr)

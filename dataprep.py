@@ -1,23 +1,25 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[2]:
 
 
 import os
 import numpy as np
 import cv2
-os.chdir('C:/labels/train')
-os.listdir(os.getcwd())
+import warnings
+import math
+import argparse
+
+#os.chdir('C:/labels/train')
+#os.listdir(os.getcwd())
 
 
-# In[2]:
 
 
-os.chdir('C:/labels')
+#os.chdir('C:/labels')
 
 
-# In[ ]:
+
 
 
 def find_unique(master,sub):
@@ -41,10 +43,10 @@ def find_unique(master,sub):
         if is_unique:
             unique.append(master[i])
     return unique
-infer=find_unique(os.listdir(),os.listdir('C:/labels/m'))
+#infer=find_unique(os.listdir(),os.listdir('C:/labels/m'))
 
 
-# In[3]:
+
 
 
 def p1_to_deepglobe(path):
@@ -133,19 +135,18 @@ def resize_crop_infer(inpath,outpath):
                     #print(pre+'_'+str(i),f"\n{excl_count} label(s) with no roads detected and omitted")
         #print(r.shape)
         #break
-resize_crop_infer('E:/infer/','E:/infer/rsz')
+#resize_crop_infer('E:/infer/','E:/infer/rsz')
 
 
-# In[4]:
 
 
-resize_crop_train_test('C:/labels','C:/labels/set1')
+
+#resize_crop_train_test('C:/labels','C:/labels/set1')
 
 
-# In[14]:
 
 
-import warnings
+
 
 def merge_masks(inpath,outpath):
     """merge_masks(inpath):
@@ -235,75 +236,80 @@ def merge_masks(inpath,outpath):
                                 tile.astype(np.uint8))
         #break
                 
-merge_masks('C:/labels/out/first02_merge','C:/labels/out/finetune')
+#merge_masks('C:/labels/out/first02_merge','C:/labels/out/finetune')
 
 
-# In[2]:
+
+def crops_to_phaseone(path):
+    #src="Something unique"
+    #crops = os.listdir(path)
+    print("=== START ===")
+    isFirst = True
+    isRoot = True
+    #print(path.split('/')[0])
+    for (root, dirs, files) in os.walk(path, topdown=True):
+        #print(dirs[0])
+        out=[]
+        if isRoot:
+            isRoot=False
+            continue
+        if files:
+            #print('Files detected in '+root)
+            out=cv2.imread(os.path.join(root,files[0]))
+        else: 
+            continue
+        for i, crop in enumerate(files[1:]):
+            #pass
+            #print(crop)
+            out=out+cv2.imread(os.path.join(root,crop))
+        outname=os.path.basename(os.path.normpath(root)).rpartition('.')[0]
+        try:
+            os.mkdir(os.path.join(root,os.pardir,os.pardir,'merge'))
+        except:
+            pass
+        print(outname+".tiff")
+        #print(os.listdir(os.path.join(root,os.pardir,os.pardir,'merge')))
+        cv2.imwrite(os.path.join(root,os.pardir,os.pardir,'merge',outname+".tiff"), out.astype(np.uint8))
+
+    print("=== FINISH ===")
+    print('Results in ',os.path.abspath(os.path.join(path,os.pardir,'merge')))
+parser = argparse.ArgumentParser()
+parser.add_argument("inpath",help="path to masks_instances folder")
+
+args = parser.parse_args()
+crops_to_phaseone(args.inpath)
+            #curr_file = crop[:41]
+            # print(crop)
+#            if isFirst:                    # print(len(crops))
+#                isFirst = False
+#                tile = np.zeros((10652, 14204, 3), dtype=np.uint8)
+#                index = int(crop.split('_')[-2].split('_')[-1])
+#                row = math.floor(index/4)
+#                col = index-(row)*4
+#                tile[row*2663:(row+1)*2663, col*3551:(col+1) *
+#                     3551, :] = cv2.imread(os.path.join(path,crop))
+#                parent_file = crop[:41]
+#      #          print("New source image detected:", src)
+#            if curr_file == parent_file:
+#                row = math.floor(index/4)
+#                col = index-(row)*4
+#                tile[row*2663:(row+1)*2663, col*3551:(col+1) *
+#                     3551, :] = cv2.imread(os.path.join(path,crop))
+#            else:
+#                cv2.imwrite(os.path.join(outpath,parent_file+".tiff"), tile)
+#                parent_file = curr_file
+#                tile = np.zeros((10652, 14204, 3), dtype=np.uint8)
+#                index = int(crop.split('_')[-2].split('_')[-1])
+#                row = math.floor(index/4)
+#                col = index-(row)*4
+#                tile[row*2663:(row+1)*2663, col*3551:(col+1) *
+#                     3551, :] = cv2.imread(os.path.join(path,crop))
+#            if i == len(files)-1:
+#                cv2.imwrite(os.path.join(outpath,parent_file+".tiff"), tile)
 
 
-#def crops_to_phaseone(path):
-#    #src="Something unique"
-##    crops = os.listdir(path)
- ####   isFirst = True
- #   isRoot = True
- #   for (root, dirs, files) in os.walk(path, topdown=True):
- #       if isRoot:
- #           for i, crop in enumerate(files):
- #               curr_file = crop[:41]
- #               # print(crop)
- #               if isFirst:
- ####                   # print(len(crops))
-    #                isFirst = False
-    #                tile = np.zeros((10652, 14204, 3), dtype=np.uint8)
-     #               index = int(crop.split('_')[-2].split('_')[-1])
-    #                row = math.floor(index/4)
-      #              col = index-(row)*4
-       #             tile[row*2663:(row+1)*2663, col*3551:(col+1) *
-        #                 3551, :] = cv2.imread(path+crop)
-         #           parent_file = crop[:41]
-          #          #print("New source image detected:", src)
-           #     if curr_file == parent_file:
-            ##       row = math.floor(index/4)
-              #      col = index-(row)*4
-               #     tile[row*2663:(row+1)*2663, col*3551:(col+1) *
-#                         3551, :] = cv2.imread(path+crop)
-#                else:
-#                    cv2.imwrite("C:/ausm/phaseone/labels/" +
-#                                parent_file+".tiff", tile)
-#                    parent_file = curr_file
-#                    tile = np.zeros((10652, 14204, 3), dtype=np.uint8)
-#                    index = int(crop.split('_')[-2].split('_')[-1])
-#                    row = math.floor(index/4)
-#                    col = index-(row)*4
-##                    tile[row*2663:(row+1)*2663, col*3551:(col+1) *
-#                         3551, :] = cv2.imread(path+crop)
-#                if i == len(files)-1:
-#                    cv2.imwrite("C:/ausm/phaseone/labels/" +
-#                                parent_file+".tiff", tile)
-#        isRoot = False
-#        break
 
 
-# In[17]:
-
-
-fuck='RSZ_IMG_MM000XXX_2021-05-12_18-10-35.997_6661_0_mask.png'
-index=int(fuck.split('_')[-2])
-index
-prefix=fuck.rsplit('_',2)[0]
-prefix
-if index==0 
-
-
-# In[27]:
-
-
-fuck=np.zeros([4,4])
-fuck=fuck==0
-fuck
-
-
-# In[ ]:
 
 
 
