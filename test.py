@@ -196,7 +196,7 @@ def run():
 
     print('Input: 1024x1024 .tifs in',os.path.abspath(source))
     print("-------------------------------------------------")
-    print('Output: 14204x10652 .png masks in', os.path.abspath(target))
+    print('Output: .png masks in', os.path.abspath(target))
     print("-------------------------------------------------")
 
     lab=list(filter(lambda x: x.endswith('tif'),val))
@@ -242,6 +242,9 @@ def run():
             mask = np.concatenate([mask[:,:,None],mask[:,:,None],mask[:,:,None]],axis=2)
             cv2.imwrite(os.path.join(target,name.rpartition('.')[0]+'_mask.png'),mask.astype(np.uint8))
         elif args.mode==1:
+            mask[mask>=128] = 255
+            mask[mask<=128] = 0
+            mask = np.concatenate([mask[:,:,None],mask[:,:,None],mask[:,:,None]],axis=2)
             cv2.imwrite(os.path.join(target,name.rpartition('.')[0]+'_mask.png'),mask.astype(np.uint8))
         elif args.mode==2:
           
