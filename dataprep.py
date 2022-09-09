@@ -103,11 +103,11 @@ def resize_crop_train_test(inpath,outpath):
         print(f"{excl_count} resized crops omitted")
 
 def resize_crop_infer(inpath,outpath):
-"""resize_crop_infer(inpath,outpath)
+    """resize_crop_infer(inpath,outpath)
     Resize PhaseOne images in inpath to 0.5m GSD of DeepGlobe then slices out 1024 x 1024 crop out of corners
     Input: inpath - path to PhaseOne images
     Output: outpath - path to folder to output crops
-"""
+    """
     files=os.listdir(inpath)
 
     for file in files:
